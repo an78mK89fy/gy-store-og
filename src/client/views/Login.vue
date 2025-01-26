@@ -9,25 +9,27 @@ const isLocal = location.hostname === 'localhost' || location.hostname === '127.
 
 // 登录表单
 const formLogin = reactive({
-    account: '',
-    password: ''
+    phone: '',
+    password: '',
+    stay: false
 })
 // 登录
 function userLogin(form) {
-    new Promise(resolve => {
+    new Promise((resolve, reject) => {
         if (form) { // 表单登录
-            if (form.account && form.password) { resolve() } // 检测输入框
+            if (form.phone && form.password) { resolve() } // 检测输入框
             else { ElMessage({ message: '账户和密码不得为空' }) }
-        } else { resolve() } // 无表单token登陆验证
-    }).then(() => {
-        request.user.login(form).then(res => {
-            if (res.data.user) { // 登陆成功
-                sessionStorage.setItem('userName', res.data.user.name)
-                console.log('11')
-                router.push('main')
-            } else { ElMessage(res.data.elMessage) } // 登陆失败
-        }).catch(result => { if (form) ElMessage({ message: result, type: 'error' }) })
-    })
+        } else { // 无表单token登陆验证
+            const cookies = document.cookie ? document.cookie.split('; ') : [];
+            const cookieToken = cookies.find(cookie => cookie.startsWith('token='));
+            cookieToken ? resolve() : reject()
+        }
+    }).then(() => request.user.login(form).then(res => {
+        if (res.data.user) { // 登陆成功
+            sessionStorage.setItem('userName', res.data.user.name)
+            router.push('main')
+        }
+    })).catch(new Function)
 }
 userLogin()
 </script>
@@ -37,19 +39,22 @@ userLogin()
     <el-card>
         <h1>login</h1>
         <el-form :model="formLogin" label-width="auto" label-position="top">
-            <el-form-item label="账户">
-                <el-input v-model="formLogin.account" placeholder="手机号" clearable></el-input>
+            <el-form-item label="账户" required>
+                <el-input v-model="formLogin.phone" placeholder="手机号" clearable maxlength="11" show-word-limit />
             </el-form-item>
-            <el-form-item label="密码">
-                <el-input v-model="formLogin.password" type="password" placeholder="大小写字母+数字" clearable
+            <el-form-item label="密码" required>
+                <el-input v-model="formLogin.password" type="password" placeholder="字母+数字(6~11)" clearable
                     show-password></el-input>
             </el-form-item>
             <el-form-item>
+                <el-checkbox v-model="formLogin.stay" label="保持登录" />
+            </el-form-item>
+            <el-form-item>
                 <el-button type="primary" @click="userLogin(formLogin)">登录</el-button>
-                <el-button type="info">忘记密码</el-button>
-                <el-button v-if="isLocal" type="success">
-                    <RouterLink to="admin">用户管理</RouterLink>
-                </el-button>
+                <el-button type="info" @click="request.user.forget">忘记密码</el-button>
+                <RouterLink to="admin" v-if="isLocal" style="margin-left: 36px;">
+                    <el-button type="success">用户管理</el-button>
+                </RouterLink>
             </el-form-item>
         </el-form>
     </el-card>

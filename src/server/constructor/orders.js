@@ -2,7 +2,6 @@ import { db } from '../database/dbConstructor.js'
 
 class Orders extends (await db.constructorPromise('orders')) {
     /**
-     * 创建一个订单实例配置
      * @param {Object} params 
      * @param {string} params.id
      * @param {string} params.gjpId

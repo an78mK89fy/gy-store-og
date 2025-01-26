@@ -12,9 +12,11 @@ export const dbTableSql = [
     `CREATE TABLE IF NOT EXISTS "user"(
         "hidden" TINYINT,
         "id" CHAR(36) NOT NULL PRIMARY KEY,
-        "account" VARCHAR(255),
+        "phone" CHAR(11) UNIQUE NOT NULL,
+        "name" VARCHAR NOT NULL,
         "password" CHAR(60),
-        "name" VARCHAR
+        "salt" CHAR(36),
+        "role" CHAR(36)
     )`,
     // orders
     `CREATE TABLE IF NOT EXISTS "orders"(
@@ -25,6 +27,7 @@ export const dbTableSql = [
         "note" TEXT,
         "timeCreate" INTEGER,
         "timeLast" INTEGER,
-        "id_prop_state" CHAR(32)
+        "id_prop_state" CHAR(32),
+        "client" VARCHAR
     )`,
 ]

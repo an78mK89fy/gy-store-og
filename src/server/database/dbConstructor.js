@@ -70,17 +70,16 @@ db.constructorPromise = (tableName) => new Promise(resolve => {
             }
             static findByColumnPromise(columnName, cellsValue) {
                 return new Promise((resolve, reject) => {
-                    db.get(
+                    db.all(
                         `SELECT * FROM "${tableName}" WHERE "${columnName}"=?`,
-                        [cellsValue], (err, row) => err ? reject(err) : resolve(row)
+                        [cellsValue], (err, rows) => err ? reject(err) : resolve(rows)
                     )
                 })
             }
-            static listPromise(filters) {
+            static listPromise(hidden = 0, filters = '') {
                 return new Promise((resolve, reject) => {
-                    const _filters = filters ? ` AND (${filters})` : ''
                     db.all(
-                        `SELECT * FROM ${tableName} WHERE "hidden"=0${_filters}`,
+                        `SELECT * FROM ${tableName} WHERE "hidden"=${hidden}${filters && ` AND (${filters})`}`,
                         (err, rows) => err ? reject(err) : resolve(rows)
                     )
                 })
@@ -103,13 +102,21 @@ db.constructorPromise = (tableName) => new Promise(resolve => {
                     if (this.id) {
                         db.get(`SELECT "id" FROM "${tableName}" WHERE "id"=?`, [this.id], (err, row) => {
                             if (err) { return reject(err) }
-                            const InsertCols = columnNames.map(column => `"${column}"`).join()
-                            const InsertQ = Array(columnNames.length).fill('?').join()
-                            db.run(
-                                `INSERT INTO ${tableName}(${InsertCols}) VALUES(${InsertQ})`,
-                                columnNames.map(column => this[column]),
-                                err => err ? reject(err) : resolve()
-                            )
+                            if (row) { //修改
+                                const setCols = columnNames.map(column => `"${column}"='${this[column]}'`).join()
+                                db.run(
+                                    `UPDATE "${tableName}" SET ${setCols} WHERE "id"=?`,
+                                    [this.id], err => err ? reject(err) : resolve()
+                                )
+                            } else { //创建
+                                const InsertCols = columnNames.map(column => `"${column}"`).join()
+                                const InsertQ = Array(columnNames.length).fill('?').join()
+                                db.run(
+                                    `INSERT INTO ${tableName}(${InsertCols}) VALUES(${InsertQ})`,
+                                    columnNames.map(column => this[column]),
+                                    err => err ? reject(err) : resolve()
+                                )
+                            }
                         })
                     }
                 })
