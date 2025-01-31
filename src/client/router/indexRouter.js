@@ -4,12 +4,11 @@ import Login from '../views/Login.vue'
 import Main from '../views/Main.vue'
 import Admin from '../views/Admin.vue'
 
-const history = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-    ? createWebHashHistory()
-    : createMemoryHistory()
+import { isState } from '../utils/isState.js'
 
 const router = createRouter({
-    history, routes: [
+    history: isState.local ? createWebHashHistory() : createMemoryHistory(),
+    routes: [
         { path: '/', component: Login },
         {
             path: '/user', children: [

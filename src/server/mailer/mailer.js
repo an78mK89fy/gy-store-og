@@ -7,8 +7,8 @@ const transport = nodemailer.createTransport({
     port: 465,
     secure: true,
     auth: {
-        user: "",
-        pass: "",
+        user: process.env.SEV_MAILER_USER,
+        pass: process.env.SEV_MAILER_PASS,
     }
 })
 

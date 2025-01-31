@@ -1,2 +1,2 @@
-cd C:\Users\guoYouPaper\Documents\_VisualStudioCode\gy-store-og
+cd %~dp0
 npm run start

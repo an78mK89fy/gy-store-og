@@ -14,7 +14,7 @@ mwVerifyToken.use((req, res, next) => {
         res.cookie('token', null, { maxAge: 0 })
         res.send({
             elMessage: { message: `${'用户'}token无效,即将退出,${err}`, type: 'error' },
-            state: { tokenLapse: 1, config: { timeout: 3000 } }
+            route: { type: 'tokenOut', path: '/', timeout: 1200 }
         })
     })
 })

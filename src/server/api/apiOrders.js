@@ -18,37 +18,38 @@ apiOrders.get('/list', async (req, res) => {
     })
 })
 
+apiOrders.get('/search/:key/:value', (req, res) => {
+
+})
+
 apiOrders.use(mwVerifyToken)
 
 apiOrders.post('/save', (req, res) => {
-    if (req.files.length && req.body.id) {
+    if (req.files.length && req.body.gjpId) {
         Orders.getPropPromise('state', '新').then(row => {
             const orders = new Orders({
-                id: req.files[0].filename,
-                gjpId: req.body.gjpId,
-                note: req.body.note,
-                timeCreate: Date.now(),
-                id_prop_state: row.id
+                ...req.body, id: req.files[0].filename, timeCreate: Date.now(), id_prop_state: row.id
             })
-            orders.savePromise().then(() => {
-                orders.replaceIdPromise('id_prop_state').then(() => res.send({ orders }))
-            }).catch(result => res.send({ elMessage: { message: result, type: 'error' } }))
-        }).catch(err => res.send({ elMessage: { message: err.message, type: 'error' } }))
+            orders.savePromise().then(() => orders.replaceIdPromise('id_prop_state').then(() => res.send({
+                orders, elMessage: { message: '成功', type: 'success' }
+            }))).catch(result => res.send({ elMessage: { message: result, type: 'error' } }))
+        }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
     } else { res.send({ elMessage: { message: '"单据编号"和"切纸单"必填', type: 'error' } }) }
 })
 
 apiOrders.delete('/del/:id', (req, res) => {
-    db.run(`UPDATE "orders" SET "hidden"=1 WHERE "id"=?`, [req.params.id],
-        err => err ? res.send({ elMessage: { message: err, type: 'error' } }) : res.end()
-    )
+    db.run(`UPDATE "orders" SET "hidden"=1 WHERE "id"=?`, [req.params.id], err => {
+        err ? res.send({ elMessage: { message: err.message, type: 'error' } }) : res.end()
+    })
 })
 
-apiOrders.post('/state', (req, res) => {
+apiOrders.put('/state', (req, res) => {
     db.run(
         `UPDATE "orders" SET "id_prop_state"=?,"timeLast"=? WHERE "id"=?`,
         [req.body.id.idState, Date.now(), req.body.id.idOrders], err => {
-            if (err) { res.send({ elMessage: { message: err, type: 'error' } }) }
-            else { res.end() }
+            if (err) {
+                res.send({ elMessage: { message: err.message, type: 'error' } })
+            } else { res.end() }
         }
     )
 })

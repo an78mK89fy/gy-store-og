@@ -2,7 +2,7 @@ import { db } from '../database/dbConstructor.js'
 
 class Orders extends (await db.constructorPromise('orders')) {
     /**
-     * @param {Object} params 
+     * @param {object} params 
      * @param {string} params.id
      * @param {string} params.gjpId
      * @param {string} params.note
@@ -17,7 +17,7 @@ class Orders extends (await db.constructorPromise('orders')) {
 await Promise.all([
     Orders.setPropPromise('type', ['整件', '分切']),
     Orders.setPropPromise('state', ['新', '已阅', '进行中', '完成'])
-]).catch(err => { if (err) { console.log(err) } })
+]).catch(err => { if (err) { console.error(err) } })
 
 
 export { Orders }

@@ -15,8 +15,7 @@ export const dbTableSql = [
         "phone" CHAR(11) UNIQUE NOT NULL,
         "name" VARCHAR NOT NULL,
         "password" CHAR(60),
-        "salt" CHAR(36),
-        "role" CHAR(36)
+        "salt" CHAR(36)
     )`,
     // orders
     `CREATE TABLE IF NOT EXISTS "orders"(

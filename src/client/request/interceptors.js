@@ -6,21 +6,20 @@ function request(config) {
 
 function response() {
     function resolve(res) {
-        if (res.data.elMessage) { ElMessage(res.data.elMessage) }
-        if (res.data?.state?.tokenLapse || res.data?.state?.logout) { // token失效
-            sessionStorage.removeItem('userName')
-            setTimeout(() => {
-                router.push('/')
-            }, res.data.state?.config?.timeout || 3000)
-        } return Promise.resolve(res)
+        // 带消息
+        if (res.data.elMessage) { ElMessage({ ...res.data.elMessage, duration: res.data.route?.timeout }) }
+        if (res.data.route) { // 带路由参数
+            if (['tokenOut', 'logout'].includes(res.data.route.type)) { sessionStorage.removeItem('userName') }
+            if (res.data.route.type === 'pswdOut') { localStorage.removeItem('formLogin') }
+            setTimeout(() => router.push(res.data.route.path), res.data.route.timeout || 0);
+        }
+        return Promise.resolve(res)
     }
     function reject(err) {
-        ElMessage({ message: err, type: 'error' })
+        ElMessage({ message: err.message, type: 'error' })
         return Promise.reject(err)
     }
     return [resolve, reject]
 }
 
-export const interceptors = {
-    request, response
-}
+export const interceptors = { request, response }

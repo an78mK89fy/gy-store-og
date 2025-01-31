@@ -4,11 +4,16 @@ import { apiUser } from './apiUser.js'
 import { apiAdmin } from './apiAdmin.js'
 import { apiOrders } from './apiOrders.js'
 import { mwVerifyAdmin } from '../middleware/mwVerifyAdmin.js'
+import { mwOnlyHostname } from '../middleware/mwOnlyHostname.js'
 
 const api = express.Router()
 
 api.use('/admin', [mwVerifyAdmin, apiAdmin])
+
+api.use(mwOnlyHostname)
+// 内判定token
 api.use('/user', apiUser)
+// 内判定token
 api.use('/orders', apiOrders)
 
 export { api }

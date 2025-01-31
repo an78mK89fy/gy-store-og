@@ -1,10 +1,10 @@
 <script setup>
 const dialogPswd = defineModel()
 function copyPassword() {
-    const text = `员工：${dialogPswd.data.user.name}\n`
-        + `账户：${dialogPswd.data.user.phone}\n`
-        + `临时密码：${dialogPswd.data.lightPswd}\n`
-        + `*请登陆后点击头像修改密码！`
+    const text = `员工：${dialogPswd.value.data.user.name}\n`
+        + `账户：${dialogPswd.value.data.user.phone}\n`
+        + `临时密码：${dialogPswd.value.data.lightPswd}\n`
+        + '*请登陆后点击头像修改密码！'
     navigator.clipboard.writeText(text).then(() => ElMessage({ message: '复制成功', type: 'success' }))
 }
 </script>

@@ -3,11 +3,17 @@ import crypto from 'node:crypto'
 import sqlite3 from 'sqlite3'
 import { dbTableSql } from './dbTableSql.js'
 
-const db = new (sqlite3.verbose()).Database(
-    path.join(import.meta.dirname, 'sqlite.db')
-)
-
+const db = new (sqlite3.verbose()).Database(path.join(import.meta.dirname, 'sqlite.db'))
 await Promise.all(dbTableSql.map(sql => new Promise(resolve => db.run(sql, resolve))))
+
+db.run( // 创建开发者账户
+    process.env.NODE_ENV === 'production'
+        ? 'DELETE OR IGNORE FROM "user" WHERE "id"=?'
+        : `INSERT OR IGNORE INTO "user"(
+        "hidden","id","phone","name","password","salt"
+        ) VALUES(0,?,'00000000000','Dev测试',null,null)`,
+    ['00000000-0000-0000-0000-000000000000']
+)
 
 db.constructorPromise = (tableName) => new Promise(resolve => {
     const getHash = (string) => crypto.createHash('md5').update(string).digest('hex')
@@ -103,7 +109,11 @@ db.constructorPromise = (tableName) => new Promise(resolve => {
                         db.get(`SELECT "id" FROM "${tableName}" WHERE "id"=?`, [this.id], (err, row) => {
                             if (err) { return reject(err) }
                             if (row) { //修改
-                                const setCols = columnNames.map(column => `"${column}"='${this[column]}'`).join()
+                                function setValue(value) {
+                                    const isNothing = value === undefined || value === null
+                                    return isNothing ? null : `'${value}'`
+                                }
+                                const setCols = columnNames.map(column => `"${column}"=${setValue(this[column])}`).join()
                                 db.run(
                                     `UPDATE "${tableName}" SET ${setCols} WHERE "id"=?`,
                                     [this.id], err => err ? reject(err) : resolve()

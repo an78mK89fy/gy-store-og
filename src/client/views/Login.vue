@@ -2,17 +2,13 @@
 import { reactive } from 'vue';
 import { useRouter } from 'vue-router'
 
-import { request } from '../request/indexRequest.js'
+import { request } from '../request/request.js'
+import { isState } from '../utils/isState.js'
 const router = useRouter()
 
-const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
-
 // 登录表单
-const formLogin = reactive({
-    phone: '',
-    password: '',
-    stay: false
-})
+const formLogin = reactive(JSON.parse(localStorage.getItem('formLogin')) || { phone: '', password: '', stay: false })
+function clearRemenber() { localStorage.removeItem('formLogin') }
 // 登录
 function userLogin(form) {
     new Promise((resolve, reject) => {
@@ -26,8 +22,9 @@ function userLogin(form) {
         }
     }).then(() => request.user.login(form).then(res => {
         if (res.data.user) { // 登陆成功
+            if (formLogin.stay) { localStorage.setItem('formLogin', JSON.stringify(formLogin)) }
+            else { clearRemenber() }
             sessionStorage.setItem('userName', res.data.user.name)
-            router.push('main')
         }
     })).catch(new Function)
 }
@@ -39,20 +36,29 @@ userLogin()
     <el-card>
         <h1>login</h1>
         <el-form :model="formLogin" label-width="auto" label-position="top">
-            <el-form-item label="账户" required>
-                <el-input v-model="formLogin.phone" placeholder="手机号" clearable maxlength="11" show-word-limit />
+            <el-form-item required>
+                <template #label>
+                    <el-space><el-icon><el-icon-user /></el-icon>账户</el-space>
+                </template>
+                <el-input v-model.trim="formLogin.phone" placeholder="手机号" clearable maxlength="11" show-word-limit />
             </el-form-item>
-            <el-form-item label="密码" required>
-                <el-input v-model="formLogin.password" type="password" placeholder="字母+数字(6~11)" clearable
-                    show-password></el-input>
+            <el-form-item required>
+                <template #label>
+                    <el-space><el-icon><el-icon-lock /></el-icon>密码</el-space>
+                </template>
+                <el-input v-model.trim="formLogin.password" type="password" placeholder="字母Aa-Zz 数字0-9 字符@#$%^&*`~()-+="
+                    clearable show-password />
             </el-form-item>
             <el-form-item>
-                <el-checkbox v-model="formLogin.stay" label="保持登录" />
+                <el-space>
+                    <el-checkbox v-model="formLogin.stay" label="保持登录" />
+                    <el-button link type="info" @click="clearRemenber">清除保存</el-button>
+                </el-space>
             </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="userLogin(formLogin)">登录</el-button>
                 <el-button type="info" @click="request.user.forget">忘记密码</el-button>
-                <RouterLink to="admin" v-if="isLocal" style="margin-left: 36px;">
+                <RouterLink to="admin" v-if="isState.local" style="margin-left: 36px;">
                     <el-button type="success">用户管理</el-button>
                 </RouterLink>
             </el-form-item>
@@ -66,8 +72,12 @@ userLogin()
 </template>
 
 <style scoped>
-h1.title {
-    text-align: center;
+h1 {
+    font-family: 'Microsoft YaHei';
+
+    &.title {
+        text-align: center;
+    }
 }
 
 .el-card {
