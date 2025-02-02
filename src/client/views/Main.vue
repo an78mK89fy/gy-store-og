@@ -15,7 +15,7 @@ storeOrders.list()
     <el-container>
         <div class="main">
             <Headers v-if="isState.mobile" />
-            <el-table v-loading="table.isLoading" :data="table.rows" row-key="id"
+            <el-table :data="table.rows" row-key="id"
                 :expand-row-keys="table.rows.map(row => row.id)" table-layout="auto" height="100%">
                 <el-table-column label="序" type="index" width="40px" />
                 <el-table-column prop="gjpId">
@@ -62,7 +62,7 @@ storeOrders.list()
                                 </el-space>
                             </el-space>
                             <div v-if="scope.row.note">
-                                <el-tag style="display: inline-flex;">留言</el-tag>&nbsp;<span
+                                <el-tag type="danger" style="display: inline-flex;">留言</el-tag>&nbsp;<span
                                     v-text="scope.row.note"></span>
                             </div>
                             <img class="cut" :src="origin + '/upload/' + scope.row.id" :alt="scope.row.id">
@@ -70,7 +70,6 @@ storeOrders.list()
                     </template>
                 </el-table-column>
             </el-table>
-            <el-pagination layout="prev, pager, next" :total="storeOrders.count" :page-size="10" />
         </div>
         <el-aside width="380px" v-if="!isState.mobile">
             <Headers v-if="!isState.mobile" style="margin-bottom: 8px;" />

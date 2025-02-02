@@ -5,6 +5,7 @@ import multer from "multer";
 import cookieParser from 'cookie-parser'
 import ViteExpress from "vite-express";
 
+import { mwOnlyHostname } from './middleware/mwOnlyHostname.js'
 import { mwSafaFilters } from './middleware/mwSafaFilters.js'
 import { api } from './api/api.js'
 
@@ -14,6 +15,7 @@ const dest = path.join(import.meta.dirname, './database/temp')
 const upload = multer({ dest })
 
 app.use(
+  api.use(mwOnlyHostname),
   express.urlencoded({ extended: true }),
   express.json(),
   upload.any(),
@@ -21,7 +23,7 @@ app.use(
   cookieParser()
 )
 
-app.use('/upload', express.static(dest))
+app.use('/upload', express.static(dest, { index: false }))
 app.use('/api', api)
 
 const port = process.env.SEV_PORT || 3000

@@ -16,6 +16,7 @@
     "cookie-parser": "^1.4.7",
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.7",
+    "dotenv-cli": "^8.0.0",
     "element-plus": "^2.9.1",
     "express": "^4.18.2",
     "formidable": "^3.5.2",

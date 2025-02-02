@@ -7,11 +7,13 @@ import { mwVerifyToken } from '../middleware/mwVerifyToken.js'
 
 const apiOrders = express.Router()
 
-apiOrders.get('/list', async (req, res) => {
-    const idFinish = (await Orders.getPropPromise('state', '完成')).id
-    const filters1 = `("timeLast">${Date.now() - (6 * 3600000)} AND "id_prop_state"='${idFinish}')`
-    const filters2 = `"id_prop_state"!='${idFinish}'`
-    Orders.listPromise(0, `${filters1} OR ${filters2}`).then(result => {
+const idFinish = await Orders.getPropPromise('state', '完成').id
+const filters1 = `("timeLast">${Date.now() - (6 * 3600000)} AND "id_prop_state"='${idFinish}')`
+const filters2 = `"id_prop_state"!='${idFinish}'`
+const filters = `${filters1} OR ${filters2}`
+
+apiOrders.get('/list', (req, res) => {
+    Orders.listPromise(0, filters).then(result => {
         const orders = result.map(row => new Orders(row))
         Promise.all(orders.map(row => row.replaceIdPromise('id_prop_state')).concat(Orders.getPropPromise('state')))
             .then(result => res.send({ rows: orders, state: result[orders.length] }))
@@ -20,14 +22,13 @@ apiOrders.get('/list', async (req, res) => {
 })
 
 apiOrders.get('/search/:key/:value', (req, res) => {
-    if (+req.params.key) { // 单据编号
-        Orders.listPromise(0,).then(rows => {
-            console.log(rows)
-            res.end()
-        }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
-    } else { // 客户名称
-
-    }
+    const filtersSearch = `${+req.params.key ? '"gjpId"' : '"client"'}='${req.params.value}'`
+    Orders.listPromise(0, `(${filters}) AND ${filtersSearch}`).then(rows => {
+        const orders = rows.map(row => new Orders(row))
+        Promise.all(orders.map(row => row.replaceIdPromise('id_prop_state')))
+            .then(() => res.send({ rows: orders }))
+            .catch(result => res.send({ elMessage: { message: result, type: 'error' } }))
+    }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
 })
 
 apiOrders.use(mwVerifyToken) // => 限登陆后操作

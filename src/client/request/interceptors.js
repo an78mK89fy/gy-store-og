@@ -11,7 +11,7 @@ function response() {
         if (res.data.route) { // 带路由参数
             if (['tokenOut', 'logout'].includes(res.data.route.type)) { sessionStorage.removeItem('userName') }
             if (res.data.route.type === 'pswdOut') { localStorage.removeItem('formLogin') }
-            setTimeout(() => router.push(res.data.route.path), res.data.route.timeout || 0);
+            if (res.data.route?.path) { setTimeout(() => router.push(res.data.route.path), res.data.route.timeout || 0); }
         }
         return Promise.resolve(res)
     }

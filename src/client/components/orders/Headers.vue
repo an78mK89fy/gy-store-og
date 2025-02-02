@@ -20,8 +20,11 @@ const user = {
 const formSearch = reactive({ key: '0', value: '' })
 function search(form) {
     if (!form.value) { return storeOrders.list(true) }
+    storeOrders.table.isLoading = true
     request.orders.search(form).then(res => {
-
+        storeOrders.table.isLoading = false
+        if (!res.data.rows) { return }
+        storeOrders.table.rows = res.data.rows.reverse()
     })
 }
 // 改密码
@@ -48,7 +51,8 @@ user.forget = form => {
                 <RouterLink v-else to="/">登录</RouterLink>
             </el-avatar>
             <!-- 搜索 -->
-            <el-input v-model.trim="formSearch.value" placeholder="enter = 搜索 | 点击刷新 =>" clearable>
+            <el-input v-model.trim="formSearch.value" v-loading="storeOrders.table.isLoading" clearable
+                placeholder="enter = 搜索 | 点击刷新 =>">
                 <template #prepend>
                     <el-select v-model="formSearch.key" style="width: 100px">
                         <el-option label="客户名称" value="0" />

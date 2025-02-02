@@ -20,7 +20,7 @@ function userLogin(form) {
     }).then(() => {
         isLoading.value = true
         request.user.login(form).then(res => {
-            setTimeout(() => isLoading.value = false, 1000);
+            setTimeout(() => isLoading.value = false, res.data.route?.timeout || 0);
             if (res.data.user) { // 登陆成功
                 if (formLogin.stay) { localStorage.setItem('formLogin', JSON.stringify(formLogin)) }
                 else { clearRemenber() }

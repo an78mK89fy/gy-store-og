@@ -6,6 +6,7 @@ import { User } from '../constructor/user.js'
 import { mwVerifyToken } from '../middleware/mwVerifyToken.js'
 
 const apiUser = express.Router()
+const tokenTimeout = process.env.TOKTEN_TIMEOUT || 129600000
 
 apiUser.post('/login', (req, res) => {
     new Promise(resolve => {
@@ -17,8 +18,8 @@ apiUser.post('/login', (req, res) => {
                     const salt = crypto.randomUUID()
                     const user = new User({ ...rows[0], salt })
                     user.savePromise().then(() => {
-                        const token = jwt.sign({ id: rows[0].id }, salt)
-                        res.cookie('token', token, { maxAge: req.body.form.stay ? 3000000000 : undefined })
+                        const token = jwt.sign({ id: rows[0].id, stay: req.body.form.stay }, salt)
+                        res.cookie('token', token, { maxAge: req.body.form.stay ? tokenTimeout : undefined })
                         resolve(rows[0])
                     }).catch(err => res.send({ elMessage: { message: '加盐失败:' + err, type: 'error' } }))
                 }// 邮箱不存在
@@ -27,17 +28,23 @@ apiUser.post('/login', (req, res) => {
         } else if (req.cookies.token) { //token登录
             User.findByIdPromise(jwt.decode(req.cookies.token).id).then(row => {
                 if (row) {
-                    jwt.verify(req.cookies.token, row.salt, err => {
+                    jwt.verify(req.cookies.token, row.salt, (err, decode) => {
                         if (err) {
                             res.cookie('token', null, { maxAge: 0 })
                             res.send({
                                 elMessage: { message: `用户"${row.name}"的token无效, ` + err, type: 'error' },
-                                route: { path: 'main' }
+                                route: { type: 'tokenTimeout', timeout: 1200 }
                             })
-                        } else { resolve(row) }
+                        } else {
+                            if (decode.stay) {
+                                const token = jwt.sign({ id: row.id }, salt)
+                                res.cookie('token', token, { maxAge: tokenTimeout })
+                            }
+                            resolve(row)
+                        }
                     })
                 }
-            })
+            }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
         }
     }).then(row => res.send({
         user: { name: row.name }, route: { path: 'main' }
