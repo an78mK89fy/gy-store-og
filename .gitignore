@@ -13,6 +13,7 @@ dist-ssr
 *.local
 vite.config.js.*
 .env*
+!.env.template
 
 # Editor directories and files
 .idea
@@ -26,3 +27,6 @@ vite.config.js.*
 #my
 temp
 *.db
+.flaskenv*
+!.env.project
+!.env.vault

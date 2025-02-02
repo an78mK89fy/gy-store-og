@@ -5,6 +5,7 @@ import multer from "multer";
 import cookieParser from 'cookie-parser'
 import ViteExpress from "vite-express";
 
+import { mwSafaFilters } from './middleware/mwSafaFilters.js'
 import { api } from './api/api.js'
 
 const app = express();
@@ -16,12 +17,14 @@ app.use(
   express.urlencoded({ extended: true }),
   express.json(),
   upload.any(),
+  mwSafaFilters,
   cookieParser()
 )
 
 app.use('/upload', express.static(dest))
 app.use('/api', api)
 
-ViteExpress.listen(app, process.env.SEV_PORT, () => console.log(
-  `[ctrl] + [鼠标左键] 点击链接去管理用户 http://localhost:${process.env.SEV_PORT}/#/admin`
+const port = process.env.SEV_PORT || 3000
+ViteExpress.listen(app, port, () => console.log(
+  `[ctrl] + [鼠标左键] 点击链接去管理用户 http://localhost:${port}/#/admin`
 ))

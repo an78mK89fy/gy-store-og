@@ -83,6 +83,7 @@ const dialogRebackUser = ref(false)
                 <el-page-header @back="router.push('/')">
                     <template #content>
                         <el-button type="primary" plain size="small" @click="dialogRebackUser = true">恢复用户</el-button>
+                        <el-button type="danger" text size="small" @click="dialogRebackUser = true">集体注销</el-button>
                     </template>
                 </el-page-header>
             </template>

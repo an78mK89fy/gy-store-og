@@ -1,11 +1,8 @@
 <script setup>
-import { reactive } from 'vue';
-import { useRouter } from 'vue-router'
-
+import { reactive, ref } from 'vue';
 import { request } from '../request/request.js'
 import { isState } from '../utils/isState.js'
-const router = useRouter()
-
+const isLoading = ref(false)
 // 登录表单
 const formLogin = reactive(JSON.parse(localStorage.getItem('formLogin')) || { phone: '', password: '', stay: false })
 function clearRemenber() { localStorage.removeItem('formLogin') }
@@ -20,20 +17,24 @@ function userLogin(form) {
             const cookieToken = cookies.find(cookie => cookie.startsWith('token='));
             cookieToken ? resolve() : reject()
         }
-    }).then(() => request.user.login(form).then(res => {
-        if (res.data.user) { // 登陆成功
-            if (formLogin.stay) { localStorage.setItem('formLogin', JSON.stringify(formLogin)) }
-            else { clearRemenber() }
-            sessionStorage.setItem('userName', res.data.user.name)
-        }
-    })).catch(new Function)
+    }).then(() => {
+        isLoading.value = true
+        request.user.login(form).then(res => {
+            setTimeout(() => isLoading.value = false, 1000);
+            if (res.data.user) { // 登陆成功
+                if (formLogin.stay) { localStorage.setItem('formLogin', JSON.stringify(formLogin)) }
+                else { clearRemenber() }
+                sessionStorage.setItem('userName', res.data.user.name)
+            }
+        }).catch(() => isLoading.value = false)
+    }).catch(new Function)
 }
 userLogin()
 </script>
 
 <template>
     <h1 class="title">国友纸业<br>Order Manage System<br>Part.AoGuang</h1>
-    <el-card>
+    <el-card v-loading="isLoading">
         <h1>login</h1>
         <el-form :model="formLogin" label-width="auto" label-position="top">
             <el-form-item required>

@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon src/server/server.js -w src/server",
-    "start": "dotenv -e .env.production node src/server/server.js",
+    "start": "dotenv -e .env.production pm2 start ecosystem.config.cjs server && pm2 logs",
+    "stop": "pm2 stop ecosystem.config.cjs",
+    "off": "pm2 delete ecosystem.config.cjs",
     "build": "vite build"
   },
   "dependencies": {
@@ -21,6 +23,8 @@
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.10.0",
     "pinia": "^2.3.1",
+    "pinyin-pro": "^3.26.0",
+    "pm2": "^5.4.3",
     "scribe.js-ocr": "^0.6.1",
     "sqlite3": "^5.1.7",
     "vite-express": "*",

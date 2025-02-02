@@ -1,4 +1,4 @@
-import { router } from '../router/indexRouter.js'
+import { router } from '../router/router.js'
 
 function request(config) {
     return config

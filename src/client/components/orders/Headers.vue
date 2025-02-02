@@ -1,7 +1,9 @@
 <script setup>
-import { request } from '../../request/request.js'
+import { useStoreOrders } from '../../stores/useStoreOrders.js';
 import { reactive } from 'vue';
+import { request } from '../../request/request.js'
 
+const storeOrders = useStoreOrders()
 // 用户
 const user = {
     name: sessionStorage.getItem('userName'),
@@ -15,11 +17,10 @@ const user = {
     }
 }
 // 搜索
-const props = defineProps(['refresh'])
 const formSearch = reactive({ key: '0', value: '' })
-function search() {
-    if (!formSearch.value) { return props.refresh(true) }
-    request.orders.search(formSearch).then(res => {
+function search(form) {
+    if (!form.value) { return storeOrders.list(true) }
+    request.orders.search(form).then(res => {
 
     })
 }
@@ -55,8 +56,8 @@ user.forget = form => {
                     </el-select>
                 </template>
                 <template #append>
-                    <el-button @click="search">
-                        <el-icon>
+                    <el-button @click="search(formSearch)">
+                        <el-icon color="#409eff">
                             <el-icon-refresh v-show="!formSearch.value" />
                             <el-icon-search v-show="formSearch.value" />
                         </el-icon>
@@ -75,7 +76,7 @@ user.forget = form => {
                     <template #label>新密码 <el-tag>@#$%^&*`~()-+=</el-tag></template>
                     <el-input v-model.trim="dialogPswd.form.new" type="password" placeholder="设置密码" clearable
                         show-password />
-                    <el-text type="info" size="small">必含：字母Aa-Zz、数字0-9，可选：特殊字符</el-text>
+                    <el-text type="info" size="small">必含: 字母Aa-Zz、数字0-9, 可选: 特殊字符, 长度8~18</el-text>
                     <el-input v-model.trim="dialogPswd.form.password" type="password" placeholder="验证密码" clearable
                         show-password />
                 </el-form-item>
@@ -94,6 +95,8 @@ div.header {
     gap: 8px;
 
     .el-avatar {
+        color: #409eff;
+        background-color: #ecf5ff;
 
         &:hover {
             cursor: pointer;
@@ -108,7 +111,8 @@ div.header {
         }
 
         a {
-            white-space: nowrap
+            all: inherit;
+            border-bottom: 1px solid #409eff;
         }
     }
 

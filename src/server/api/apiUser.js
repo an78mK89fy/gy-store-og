@@ -52,7 +52,7 @@ apiUser.delete('/logout', (req, res) => {
             user.savePromise().then(() => {
                 res.cookie('token', null, { maxAge: 0 })
                 res.send({
-                    elMessage: { message: `"${row.name}"注销成功, 即将退出`, type: 'success' },
+                    elMessage: { message: `"${row.name}" 注销成功`, type: 'success' },
                     route: { type: 'logout', path: '/', timeout: 1200 }
                 })
             }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))

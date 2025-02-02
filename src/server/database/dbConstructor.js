@@ -8,7 +8,7 @@ await Promise.all(dbTableSql.map(sql => new Promise(resolve => db.run(sql, resol
 
 db.run( // 创建开发者账户
     process.env.NODE_ENV === 'production'
-        ? 'DELETE OR IGNORE FROM "user" WHERE "id"=?'
+        ? 'DELETE FROM "user" WHERE "id"=?'
         : `INSERT OR IGNORE INTO "user"(
         "hidden","id","phone","name","password","salt"
         ) VALUES(0,?,'00000000000','Dev测试',null,null)`,
