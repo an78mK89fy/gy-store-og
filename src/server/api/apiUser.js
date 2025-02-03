@@ -26,7 +26,7 @@ apiUser.post('/login', (req, res) => {
                 else { res.send({ elMessage: { message: '账号或密码错误', type: 'error' } }) }
             }).catch(({ message }) => { res.send({ elMessage: { message, type: 'error' } }) })
         } else if (req.cookies.token) { //token登录
-            User.findByIdPromise(jwt.decode(req.cookies.token).id).then(row => {
+            User.findByIdPromise(jwt.decode(req.cookies.token)?.id).then(row => {
                 if (row) {
                     jwt.verify(req.cookies.token, row.salt, (err, decode) => {
                         if (err) {
@@ -43,7 +43,7 @@ apiUser.post('/login', (req, res) => {
                             resolve(row)
                         }
                     })
-                }
+                } else { res.cookie('token', null, { maxAge: 0 }).end() }
             }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
         }
     }).then(row => res.send({
