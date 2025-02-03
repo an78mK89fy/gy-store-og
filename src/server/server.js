@@ -11,7 +11,7 @@ import { api } from './api/api.js'
 
 const app = express();
 
-const dest = path.join(import.meta.dirname, './database/temp')
+const dest = path.join(import.meta.dirname, '../../data/temp')
 const upload = multer({ dest })
 
 app.use(

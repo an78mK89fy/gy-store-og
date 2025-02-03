@@ -3,11 +3,7 @@ import { request } from '../request/request.js'
 
 export const useStoreOrders = defineStore('orders', {
     state: () => ({
-        table: {
-            state: [],
-            rows: [],
-            isLoading: false,
-        },
+        table: { state: [], rows: [], isLoading: false },
         create: {
             form: { gjpId: '', client: '', file: {}, fileList: [], note: '' },
             isLoading: false
@@ -84,7 +80,5 @@ export const useStoreOrders = defineStore('orders', {
             })
         }
     },
-    getters: {
-        count: state => state.table.rows.length
-    }
+    getters: { count: state => state.table.rows.length }
 })

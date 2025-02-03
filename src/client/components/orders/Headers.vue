@@ -79,7 +79,7 @@ const rules = {
             </el-input>
         </div>
         <!-- 改密码 -->
-        <el-dialog v-model="dialogPswd.show" :title="user.name" style="width: min(100dvw,420px);">
+        <el-dialog v-model="dialogPswd.show" :title="user.name" width="min(100dvw,420px)">
             <el-form label-position="top" :model="dialogPswd.form" :rules="rules">
                 <el-form-item label="原密码" prop="old">
                     <el-input v-model.trim="dialogPswd.form.old" type="password" placeholder="当前密码" clearable
@@ -98,7 +98,8 @@ const rules = {
                         show-password minlength="8" maxlength="18" :disabled="!dialogPswd.form.new" />
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="danger" plain @click="user.forget(dialogPswd.form)">修改</el-button>
+                    <el-button :disabled="!(dialogPswd.form.old && dialogPswd.form.new && dialogPswd.form.password)"
+                        type="danger" plain @click="user.forget(dialogPswd.form)">修改</el-button>
                 </el-form-item>
             </el-form>
         </el-dialog>

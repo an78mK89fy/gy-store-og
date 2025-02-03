@@ -3,7 +3,7 @@ import crypto from 'node:crypto'
 import sqlite3 from 'sqlite3'
 import { dbTableSql } from './dbTableSql.js'
 
-const db = new (sqlite3.verbose()).Database(path.join(import.meta.dirname, 'sqlite.db'))
+const db = new (sqlite3.verbose()).Database(path.join(import.meta.dirname, '../../../data/sqlite.db'))
 await Promise.all(dbTableSql.map(sql => new Promise(resolve => db.run(sql, resolve))))
 
 db.run( // 创建开发者账户

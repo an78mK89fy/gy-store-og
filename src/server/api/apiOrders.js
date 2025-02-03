@@ -54,7 +54,7 @@ apiOrders.delete('/del/:id', (req, res) => {
 
 apiOrders.put('/state', (req, res) => {
     Orders.findByIdPromise(req.body.orders.id).then(row => {
-        if (!(req.body.orders.timeLast === row.timeLast)) {
+        if (!(req.body.orders.timeLast === (row.timeLast || undefined))) {
             return res.send({ elMessage: { message: '订单变动，刷新重试', type: 'warning' } })
         } // 最后修改时间不一致
         const timeLast = Date.now()
@@ -65,7 +65,7 @@ apiOrders.put('/state', (req, res) => {
                 else { res.send({ elMessage: { message: err.message, type: 'error' } }) }
             }
         )
-    })
+    }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
 })
 
 export { apiOrders }
