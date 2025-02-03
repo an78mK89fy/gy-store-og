@@ -21,12 +21,12 @@ export const useStoreOrders = defineStore('orders', {
                 if (!formData.get('file').name) { formData.set('file', this.create.form.file) }
                 this.create.isLoading = true
                 request.orders.save(formData).then(res => {
+                    this.create.isLoading = false
                     if (!res.data.orders) { return } // 没返回orders
                     this.table.rows.unshift(res.data.orders)
                     this.create.form.fileList.length = 0
                     elForm.resetFields()
-                    this.create.value = false
-                }).catch(() => this.create.value = false)
+                }).catch(() => this.create.isLoading = false)
             } else { ElMessage({ message: '"单据编号"或"切纸单"不得为空', type: 'warning' }) }
         },
         delete(row) {
@@ -75,7 +75,13 @@ export const useStoreOrders = defineStore('orders', {
             })
         },
         search(form) {
-
+            if (!form.value) { return this.list(true) }
+            this.table.isLoading = true
+            request.orders.search(form).then(res => {
+                this.table.isLoading = false
+                if (!res.data.rows) { return }
+                this.table.rows = res.data.rows.reverse()
+            })
         }
     },
     getters: {

@@ -16,6 +16,7 @@ export const request = {
         forget: id => instance.put('/admin/forget', { id }),
         reback: form => instance.put('/admin/reback', { form }),
         list: (hidden = 0) => instance.get(`/admin/list/${hidden}`),
+        logout: () => instance.delete('/admin/logout')
     },
     orders: {
         save: formData => instance.post('/orders/save', formData),

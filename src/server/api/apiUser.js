@@ -37,7 +37,7 @@ apiUser.post('/login', (req, res) => {
                             })
                         } else {
                             if (decode.stay) {
-                                const token = jwt.sign({ id: row.id }, salt)
+                                const token = jwt.sign({ id: row.id }, row.salt)
                                 res.cookie('token', token, { maxAge: tokenTimeout })
                             }
                             resolve(row)

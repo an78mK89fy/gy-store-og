@@ -1,6 +1,7 @@
 import express from 'express'
 
 import { User } from '../constructor/user.js'
+import { db } from '../database/dbConstructor.js'
 
 const apiAdmin = express.Router()
 
@@ -52,7 +53,7 @@ apiAdmin.delete('/del/:id', (req, res) => {
 })
 
 apiAdmin.get('/list/:hidden', (req, res) => User.listPromise(req.params.hidden).then(rows => {
-    res.send({ users: rows.map(row => (new User(row)).desensitization()) })
+    res.send({ rows: rows.map(row => (new User(row)).desensitization()) })
 }))
 
 apiAdmin.put('/reback', (req, res) => {
@@ -62,6 +63,13 @@ apiAdmin.put('/reback', (req, res) => {
         user.savePromise().then(() => res.send({ user, lightPswd })).catch(({ message }) => {
             res.send({ elMessage: { message, type: 'error' } })
         })
+    })
+})
+
+apiAdmin.delete('/logout', (req, res) => {
+    db.run('UPDATE "user" SET "salt" = NULL WHERE "hidden"=0', err => {
+        if (err) { res.send({ elMessage: { message: err.message, type: 'error' } }) }
+        else { res.send({ elMessage: { message: '集体注销成功', type: 'success' } }) }
     })
 })
 

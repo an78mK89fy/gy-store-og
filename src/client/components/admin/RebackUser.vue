@@ -1,42 +1,18 @@
 <script setup>
-import { ref } from 'vue'
-import { request } from '../../request/request.js';
-import { regEx } from '../../../utils/regEx.js';
 import { toLocaleTime } from '../../utils/toLocalTime.js';
-const isShow = defineModel()
-const props = defineProps(['fn'])
-const tableUsers = ref([])
-function listReback() {
-    request.admin.list(1).then(res => {
-        if (res.data.elMessage) { return }
-        tableUsers.value = res.data.users.reverse()
-    })
-}
-function rebackUser(row) {
-    ElMessageBox.prompt(row.id, row.name, {
-        inputPlaceholder: '11位手机号',
-        confirmButtonText: '恢复',
-        inputPattern: regEx.phone,
-        inputErrorMessage: '11位手机号'
-    }).then(({ value: phone }) => {
-        request.admin.reback({ id: row.id, phone }).then(res => {
-            props.fn.alertPassword(res.data)
-            listReback()
-            props.fn.listTableUser()
-        })
-    })
-}
-
+import { useStoreAdmin } from '../../stores/useStoreAdmin.js';
+const storeAdmin = useStoreAdmin(), { dialogReback } = storeAdmin
 </script>
 
 <template>
-    <el-dialog v-model="isShow" title="恢复用户" destroy-on-close @open="listReback">
-        <el-table :data="tableUsers" table-layout="auto" height="100%">
+    <el-dialog v-model="dialogReback.show" title="恢复用户" @open="storeAdmin.list(1)" @close="storeAdmin.list"
+        destroy-on-close>
+        <el-table :data="dialogReback.rows" table-layout="auto" height="100%">
             <el-table-column label="序" type="index"></el-table-column>
             <el-table-column label="名字" prop="name"></el-table-column>
             <el-table-column label="操作">
                 <template #default="scope">
-                    <el-button type="success" plain size="small" @click="rebackUser(scope.row)">恢复</el-button>
+                    <el-button type="success" plain size="small" @click="storeAdmin.reback(scope.row)">恢复</el-button>
                 </template>
             </el-table-column>
             <el-table-column label="uid">

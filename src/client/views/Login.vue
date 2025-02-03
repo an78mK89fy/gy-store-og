@@ -11,7 +11,7 @@ function userLogin(form) {
     new Promise((resolve, reject) => {
         if (form) { // 表单登录
             if (form.phone && form.password) { resolve() } // 检测输入框
-            else { ElMessage({ message: '账户和密码不得为空' }) }
+            else { ElMessage({ message: '"账户"或"密码"不得为空', type: 'warning' }) }
         } else { // 无表单token登陆验证
             const cookies = document.cookie ? document.cookie.split('; ') : [];
             const cookieToken = cookies.find(cookie => cookie.startsWith('token='));
@@ -48,7 +48,7 @@ userLogin()
                     <el-space><el-icon><el-icon-lock /></el-icon>密码</el-space>
                 </template>
                 <el-input v-model.trim="formLogin.password" type="password" placeholder="字母Aa-Zz 数字0-9 字符@#$%^&*`~()-+="
-                    clearable show-password />
+                    clearable show-password minlength="8" maxlength="18" />
             </el-form-item>
             <el-form-item>
                 <el-space>
@@ -57,7 +57,8 @@ userLogin()
                 </el-space>
             </el-form-item>
             <el-form-item>
-                <el-button type="primary" @click="userLogin(formLogin)">登录</el-button>
+                <el-button type="primary" @click="userLogin(formLogin)"
+                    :disabled="!(formLogin.phone && formLogin.password)">登录</el-button>
                 <el-button type="info" @click="request.user.forget">忘记密码</el-button>
                 <RouterLink to="admin" v-if="isState.local" style="margin-left: 36px;">
                     <el-button type="success">用户管理</el-button>
