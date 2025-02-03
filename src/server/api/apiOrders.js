@@ -24,6 +24,7 @@ apiOrders.get('/list', (req, res) => {
 apiOrders.get('/search/:key/:value', (req, res) => {
     const filtersSearch = `${+req.params.key ? '"gjpId"' : '"client"'}='${req.params.value}'`
     Orders.listPromise(0, `(${filters}) AND ${filtersSearch}`).then(rows => {
+        if (!rows?.length) { return res.end() }
         const orders = rows.map(row => new Orders(row))
         Promise.all(orders.map(row => row.replaceIdPromise('id_prop_state')))
             .then(() => res.send({ rows: orders }))
@@ -36,26 +37,27 @@ apiOrders.use(mwVerifyToken) // => 限登陆后操作
 apiOrders.post('/save', (req, res) => {
     if (req.files.length && req.body.gjpId) {
         Orders.getPropPromise('state', '新').then(row => {
-            const orders = new Orders({
-                ...req.body, id: req.files[0].filename, timeCreate: Date.now(), id_prop_state: row.id
-            })
-            orders.savePromise().then(() => orders.replaceIdPromise('id_prop_state').then(() => res.send({
-                orders, elMessage: { message: '成功', type: 'success' }
-            }))).catch(result => res.send({ elMessage: { message: result, type: 'error' } }))
+            if (!row) { return }
+            req.body.gjpId = req.body.gjpId.toUpperCase()
+            const orders = new Orders({ ...req.body, id: req.files[0].filename, id_prop_state: row.id })
+            orders.savePromise().then(() => orders.replaceIdPromise('id_prop_state').then(() => {
+                res.send({ orders, elMessage: { message: '成功', type: 'success' } })
+            })).catch(result => res.send({ elMessage: { message: result, type: 'error' } }))
         }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
     } else { res.send({ elMessage: { message: '"单据编号"和"切纸单"必填', type: 'error' } }) }
 })
 
 apiOrders.delete('/del/:id', (req, res) => {
-    db.run(`UPDATE "orders" SET "hidden"=1 WHERE "id"=?`, [req.params.id], err => {
+    db.run(`UPDATE "orders" SET "hidden"=1,"timeLast"=? WHERE "id"=?`, [Date.now(), req.params.id], err => {
         err ? res.send({ elMessage: { message: err.message, type: 'error' } }) : res.end()
     })
 })
 
 apiOrders.put('/state', (req, res) => {
     Orders.findByIdPromise(req.body.orders.id).then(row => {
-        if (!(req.body.orders.timeLast === (row.timeLast || undefined))) {
-            return res.send({ elMessage: { message: '订单变动，刷新重试', type: 'warning' } })
+        if (!row) { return }
+        if (!(req.body.orders.timeLast === row.timeLast)) {
+            return res.send({ elMessage: { message: row.hidden ? '订单已删除，刷新重试' : '订单变动，刷新重试', type: 'error' } })
         } // 最后修改时间不一致
         const timeLast = Date.now()
         db.run(

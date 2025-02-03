@@ -15,6 +15,7 @@ class Orders extends (await db.constructorPromise('orders')) {
     constructor(params) {
         super(params)
         this.client = pinyin(params.client || '', { pattern: 'first', separator: '' })
+        this.timeCreate = params.timeCreate || Date.now()
     }
 }
 
