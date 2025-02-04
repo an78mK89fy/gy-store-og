@@ -9,7 +9,7 @@ function response() {
         // 带消息
         if (res.data.elMessage) { ElMessage({ ...res.data.elMessage, duration: res.data.route?.timeout }) }
         if (res.data.route) { // 带路由参数
-            if (['tokenOut', 'logout'].includes(res.data.route.type)) { sessionStorage.removeItem('userName') }
+            if (['tokenOut', 'logout', 'pswdOut'].includes(res.data.route.type)) { sessionStorage.removeItem('userName') }
             if (res.data.route.type === 'pswdOut') { localStorage.removeItem('formLogin') }
             if (res.data.route?.path) { setTimeout(() => router.push(res.data.route.path), res.data.route.timeout || 0); }
         }

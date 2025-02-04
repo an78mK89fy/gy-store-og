@@ -60,10 +60,11 @@ const rules = {
                 <el-tag v-text="drawerSave.form.id" />
             </el-form-item>
             <el-form-item label="手机号" prop="phone">
-                <el-input v-model.trim="drawerSave.form.phone" placeholder="登录用" maxlength="11" show-word-limit />
+                <el-input v-model.trim="drawerSave.form.phone" placeholder="登录用" maxlength="11" show-word-limit
+                    clearable />
             </el-form-item>
             <el-form-item label="员工" prop="name">
-                <el-input v-model.trim="drawerSave.form.name" placeholder="姓名" />
+                <el-input v-model.trim="drawerSave.form.name" placeholder="姓名" clearable />
             </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="storeAdmin.save" v-text="drawerSave.type"
