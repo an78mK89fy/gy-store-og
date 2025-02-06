@@ -1,5 +1,7 @@
 <script setup>
 import { isState } from '../../utils/isState.js';
+import { useStoreClient } from '../../stores/useStoreClient.js';
+const { dialog: dialogClient } = useStoreClient()
 </script>
 
 <template>
@@ -19,6 +21,12 @@ import { isState } from '../../utils/isState.js';
                     <el-icon size="32px"><el-icon-money /></el-icon>
                 </el-avatar>
                 <el-tag>切纸统计</el-tag>
+            </div>
+            <div class="app" @click="dialogClient.show = true">
+                <el-avatar size="large">
+                    <el-icon size="32px"><el-icon-user /></el-icon>
+                </el-avatar>
+                <el-tag>添加客户</el-tag>
             </div>
         </div>
         <b v-else>仅浏览模式</b>
@@ -54,6 +62,10 @@ div.box {
             background-color: #ecf5ff;
             box-shadow: #d6d7d8 0 0 3px;
         }
+    }
+
+    a {
+        all: inherit;
     }
 }
 </style>

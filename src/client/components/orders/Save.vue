@@ -1,9 +1,10 @@
 <script setup>
 import { useTemplateRef } from 'vue'
 import { useStoreOrders } from '../../stores/useStoreOrders.js'
-import { regEx } from '../../../utils/regEx.js'
+import { useStoreClient } from '../../stores/useStoreClient.js'
 
-const storeOrders = useStoreOrders(), { create: { form: formSave } } = storeOrders
+const storeOrders = useStoreOrders(), { formSave: { form } } = storeOrders
+const { query } = useStoreClient()
 const elFormRef = useTemplateRef('elFormRef')
 const elUploadRef = useTemplateRef('elUploadRef')
 function uploadFile(file, fileList) {
@@ -14,17 +15,14 @@ function handelPaste(event) {
     const file = (event.clipboardData || window.clipboardData).items[0].getAsFile()
     if (file) {
         elUploadRef.value.handleStart(file)
-        formSave.file = file
+        form.file = file
     } else { ElMessage({ message: '剪切板为空', type: 'info' }) }
 }
 const rules = {
-    gjpId: [{ trigger: 'blur', required: true, message: '"单据编号"必填' }, {
-        trigger: 'blur', validator: (r, v, cb) => regEx.gjpId.test(v) ? cb() : cb(new Error('"单据编号"格式不正确'))
-    }],
+    client: [{ trigger: 'blur', required: true, message: '"客户"必填' }],
     img: [{
         trigger: 'blur', required: true, validator: (r, v, cb) => {
-            if (formSave.fileList.length) { cb() }
-            else { cb(new Error('"切纸单"未上传')) }
+            if (form.fileList.length) { cb() } else { cb(new Error('"切纸单"未上传')) }
         }
     }]
 }
@@ -32,16 +30,13 @@ const rules = {
 
 <template>
     <el-card>
-        <el-form ref="elFormRef" :model="formSave" :rules="rules" label-width="auto" label-position="top">
-            <el-form-item label="单据编号" prop="gjpId">
-                <el-input name="gjpId" v-model.trim="formSave.gjpId" placeholder="SD-YYYY-MM-DD-NNNNN" clearable
-                    maxlength="19" show-word-limit />
-            </el-form-item>
-            <el-form-item label="客户名称" prop="client">
-                <el-input name="client" v-model="formSave.client" placeholder="选填 (拼音首字母, 汉字自动转拼音)" clearable />
+        <el-form ref="elFormRef" :model="form" :rules="rules" label-width="auto" label-position="top">
+            <el-form-item label="客户" prop="client">
+                <el-autocomplete name="client" v-model.trim="form.client" placeholder="名字" prop="client" clearable
+                    :fetch-suggestions="query" @select="({ value }) => form.client = value" :trigger-on-focus="false" />
             </el-form-item>
             <el-form-item label="切纸单" prop="img">
-                <el-upload ref="elUploadRef" v-model:file-list="formSave.fileList" :auto-upload="false"
+                <el-upload ref="elUploadRef" v-model:file-list="form.fileList" :auto-upload="false"
                     :on-change="uploadFile" list-type="picture">
                     <el-space>
                         <el-input @paste="handelPaste" @click.stop placeholder="ctrl+v = 粘贴图片" />
@@ -50,7 +45,7 @@ const rules = {
                 </el-upload>
             </el-form-item>
             <el-form-item label="留言" prop="note">
-                <el-input type="textarea" name="note" v-model.trim="formSave.note" resize="none" placeholder="选填"
+                <el-input type="textarea" name="note" v-model.trim="form.note" resize="none" placeholder="选填"
                     :rows="3" />
             </el-form-item>
             <el-form-item>

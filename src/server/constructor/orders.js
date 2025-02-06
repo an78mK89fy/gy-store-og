@@ -4,7 +4,6 @@ class Orders extends (await db.constructorPromise('orders')) {
     /**
      * @param {object} params 
      * @param {string} params.id
-     * @param {string} params.gjpId
      * @param {string} params.note
      * @param {number} params.timeCreate
      * @param {number} params.timeLast
@@ -14,7 +13,6 @@ class Orders extends (await db.constructorPromise('orders')) {
      */
     constructor(params) {
         super(params)
-        this.client = pinyin(params.client || '', { pattern: 'first', separator: '' })
         this.timeCreate = params.timeCreate || Date.now()
     }
 }

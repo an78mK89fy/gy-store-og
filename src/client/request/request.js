@@ -23,6 +23,10 @@ export const request = {
         delete: id => instance.delete(`/orders/del/${id}`),
         state: orders => instance.put('/orders/state', { orders }),
         list: filters => instance.get('/orders/list', { params: filters }),
-        search: form => instance.get(`/orders/search/${form.key}/${form.value}`)
+        search: form => instance.get(`/orders/search/${form.key}/${form.value}`),
+    },
+    client: {
+        query: pyfl => instance.get('/client/query', { params: { pyfl } }),
+        add: client => instance.post('/client/add', { client })
     }
 }

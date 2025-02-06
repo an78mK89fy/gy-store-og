@@ -4,25 +4,24 @@ import { request } from '../request/request.js'
 export const useStoreOrders = defineStore('orders', {
     state: () => ({
         table: { state: [], rows: [], isLoading: false },
-        create: {
-            form: { gjpId: '', client: '', file: {}, fileList: [], note: '' },
-            isLoading: false
-        }
+        formSave: { isLoading: false, form: { client: '', file: {}, fileList: [], note: '' } }
     }),
     actions: {
         save(elForm) {
-            if (this.create.form.gjpId && this.create.form.fileList.length) {
-                if (this.create.form.gjpId.length !== 19) { return ElMessage({ message: '"单据编号"长度为19位', type: 'warning' }) }
-                const formData = new FormData(elForm.$el)
-                if (!formData.get('file').name) { formData.set('file', this.create.form.file) }
-                this.create.isLoading = true
-                request.orders.save(formData).then(res => {
-                    this.create.isLoading = false
-                    if (!res.data.orders) { return } // 没返回orders
-                    this.table.rows.unshift(res.data.orders)
-                    this.create.form.fileList.length = 0
-                    elForm.resetFields()
-                }).catch(() => this.create.isLoading = false)
+            if (this.formSave.form.client && this.formSave.form.fileList.length) {
+                request.client.query(this.formSave.form.client).then(res => {
+                    if (!res.data.has) { return ElMessage({ message: '"客户"不存在' }) }
+                    const formData = new FormData(elForm.$el)
+                    if (!formData.get('file').name) { formData.set('file', this.formSave.form.file) }
+                    this.formSave.isLoading = true
+                    request.orders.save(formData).then(res => {
+                        this.formSave.isLoading = false
+                        if (!res.data.orders) { return } // 没返回orders
+                        this.table.rows.unshift(res.data.orders)
+                        this.formSave.form.fileList.length = 0
+                        elForm.resetFields()
+                    }).catch(() => this.formSave.isLoading = false)
+                })
             } else { ElMessage({ message: '"单据编号"或"切纸单"不得为空', type: 'warning' }) }
         },
         delete(row) {
@@ -78,7 +77,7 @@ export const useStoreOrders = defineStore('orders', {
                 if (!res.data.rows) { return }
                 this.table.rows = res.data.rows.reverse()
             })
-        }
+        },
     },
     getters: { count: state => state.table.rows.length }
 })

@@ -21,18 +21,18 @@ export const dbTableSql = [
     `CREATE TABLE IF NOT EXISTS "orders"(
         "hidden" TINYINT,
         "id" CHAR(32) NOT NULL PRIMARY KEY,
-        "gjpId" CHAR(19),
         "note" TEXT,
         "timeCreate" INTEGER,
         "timeLast" INTEGER,
         "id_prop_state" CHAR(36),
-        "client" VARCHAR
+        "id_client" CHAR(36)
     )`,
+    // "gjpId" CHAR(19),
     // client
     `CREATE TABLE IF NOT EXISTS "client"(
         "hidden" TINYINT,
         "id" CHAR(32) NOT NULL PRIMARY KEY,
-        "name" VARCHAR NOT NULL,
+        "name" VARCHAR UNIQUE NOT NULL,
         "pyfl" VARCHAR NOT NULL
     )`
 ]

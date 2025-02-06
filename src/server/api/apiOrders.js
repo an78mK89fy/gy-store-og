@@ -1,5 +1,4 @@
 import express from 'express'
-import { pinyin } from 'pinyin-pro'
 
 import { db } from '../database/dbConstructor.js'
 import { Orders } from '../constructor/orders.js'
@@ -35,16 +34,15 @@ apiOrders.get('/search/:key/:value', (req, res) => {
 apiOrders.use(mwVerifyToken) // => 限登陆后操作
 
 apiOrders.post('/save', (req, res) => {
-    if (req.files.length && req.body.gjpId) {
+    if (req.files?.length && req.body.client) {
         Orders.getPropPromise('state', '新').then(row => {
             if (!row) { return }
-            req.body.gjpId = req.body.gjpId.toUpperCase()
             const orders = new Orders({ ...req.body, id: req.files[0].filename, id_prop_state: row.id })
             orders.savePromise().then(() => orders.replaceIdPromise('id_prop_state').then(() => {
                 res.send({ orders, elMessage: { message: '成功', type: 'success' } })
             })).catch(result => res.send({ elMessage: { message: result, type: 'error' } }))
         }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
-    } else { res.send({ elMessage: { message: '"单据编号"和"切纸单"必填', type: 'error' } }) }
+    } else { res.send({ elMessage: { message: '"单据编号"和"客户"必填', type: 'error' } }) }
 })
 
 apiOrders.delete('/del/:id', (req, res) => {

@@ -1,7 +1,8 @@
 <script setup>
-import CreateOrders from '../components/orders/OrdersSave.vue';
+import Save from '../components/orders/Save.vue';
 import Headers from '../components/orders/Headers.vue'
 import Menu from '../components/orders/Menu.vue'
+import Client from '../components/orders/menu/Client.vue';
 import { useStoreOrders } from '../stores/useStoreOrders.js';
 import { isState } from '../utils/isState.js';
 import { toLocaleTime } from '../utils/toLocalTime.js';
@@ -15,8 +16,8 @@ storeOrders.list()
     <el-container>
         <div class="main">
             <Headers v-if="isState.mobile" />
-            <el-table :data="table.rows" row-key="id"
-                :expand-row-keys="table.rows.map(row => row.id)" table-layout="auto" height="100%">
+            <el-table :data="table.rows" row-key="id" :expand-row-keys="table.rows.map(row => row.id)"
+                table-layout="auto" height="100%">
                 <el-table-column label="序" type="index" width="40px" />
                 <el-table-column prop="gjpId">
                     <template #header>单据编号 <el-tag v-text="storeOrders.count" type="info" /></template>
@@ -74,10 +75,11 @@ storeOrders.list()
         <el-aside width="380px" v-if="!isState.mobile">
             <Headers v-if="!isState.mobile" style="margin-bottom: 8px;" />
             <el-scrollbar>
-                <CreateOrders v-if="isState.login" />
+                <Save v-if="isState.login" />
                 <Menu></Menu>
             </el-scrollbar>
         </el-aside>
+        <Client></Client>
     </el-container>
 </template>
 
