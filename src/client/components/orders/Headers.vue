@@ -1,10 +1,11 @@
 <script setup>
 import { useStoreOrders } from '../../stores/useStoreOrders.js';
+import { useStoreClient } from '../../stores/useStoreClient.js';
 import { reactive } from 'vue';
 import { request } from '../../request/request.js'
 import { regEx } from '../../../utils/regEx.js';
 
-const storeOrders = useStoreOrders()
+const storeOrders = useStoreOrders(), { query } = useStoreClient()
 // 用户
 const user = {
     name: sessionStorage.getItem('userName'),
@@ -60,24 +61,22 @@ const rules = {
                 <RouterLink v-else to="/">登录</RouterLink>
             </el-avatar>
             <!-- 搜索 -->
-            <el-input v-model.trim="formSearch.value" v-loading="storeOrders.table.isLoading" clearable
-                placeholder="enter = 搜索 | 点击刷新 =>" maxlength="19">
-                <template #prepend>
-                    <el-select v-model="formSearch.key" style="width: 100px">
-                        <el-option label="客户名称" value="0" />
-                        <el-option label="单据编号" value="1" />
-                    </el-select>
-                </template>
+            <el-autocomplete v-model.trim="formSearch.value" :fetch-suggestions="query" :trigger-on-focus="false"
+                @select="({ value }) => formSearch.value = value" @keyup.enter="storeOrders.search(formSearch)"
+                placeholder="enter = 搜索 | 点击刷新 =>" clearable @clear="storeOrders.list">
+                <template #prepend>客户</template>
                 <template #append>
-                    <el-button @click="storeOrders.search(formSearch)">
+                    <el-button @click="storeOrders.search(formSearch)" v-loading="storeOrders.table.isLoading">
                         <el-icon color="#409eff">
                             <el-icon-refresh v-show="!formSearch.value" />
                             <el-icon-search v-show="formSearch.value" />
                         </el-icon>
                     </el-button>
                 </template>
-            </el-input>
+            </el-autocomplete>
         </div>
+        <!-- 筛选时间 -->
+        <div></div>
         <!-- 改密码 -->
         <el-dialog v-model="dialogPswd.show" :title="user.name" width="min(100dvw,420px)">
             <el-form label-position="top" :model="dialogPswd.form" :rules="rules">

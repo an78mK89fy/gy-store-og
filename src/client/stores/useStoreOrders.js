@@ -3,17 +3,19 @@ import { request } from '../request/request.js'
 
 export const useStoreOrders = defineStore('orders', {
     state: () => ({
-        table: { state: [], rows: [], isLoading: false },
-        formSave: { isLoading: false, form: { client: '', file: {}, fileList: [], note: '' } }
+        table: { state: [], rows: [], isLoading: false }, dialogPreview: { show: false, url: '' },
+        formSave: { isLoading: false, form: { index: [], id: '', client: '', file: {}, fileList: [], note: '' } }
     }),
     actions: {
         save(elForm) {
-            if (this.formSave.form.client && this.formSave.form.fileList.length) {
+            if (this.formSave.form.id) {
+                if (!this.formSave.form.client) { return ElMessage({ message: '客户必填', type: 'warning' }) }
+                this.formSave.isLoading = true
                 request.client.query(this.formSave.form.client).then(res => {
-                    if (!res.data.has) { return ElMessage({ message: '"客户"不存在' }) }
+                    if (!res.data.has) { ElMessage({ message: '"客户"不存在' }); return this.formSave.isLoading = false }
                     const formData = new FormData(elForm.$el)
-                    if (!formData.get('file').name) { formData.set('file', this.formSave.form.file) }
-                    this.formSave.isLoading = true
+                    if (Object.keys(this.formSave.form.file).length) { formData.set('file', this.formSave.form.file) }
+                    if (this.formSave.form.id) { formData.set('id', this.formSave.form.id) }
                     request.orders.save(formData).then(res => {
                         this.formSave.isLoading = false
                         if (!res.data.orders) { return } // 没返回orders
@@ -22,7 +24,29 @@ export const useStoreOrders = defineStore('orders', {
                         elForm.resetFields()
                     }).catch(() => this.formSave.isLoading = false)
                 })
-            } else { ElMessage({ message: '"单据编号"或"切纸单"不得为空', type: 'warning' }) }
+            } else {
+                if (this.formSave.form.client && this.formSave.form.fileList.length) {
+                    this.formSave.isLoading = true
+                    request.client.query(this.formSave.form.client).then(res => {
+                        if (!res.data.has) { ElMessage({ message: '"客户"不存在' }); return this.formSave.isLoading = false }
+                        const formData = new FormData(elForm.$el)
+                        if (!formData.get('file').name) { formData.set('file', this.formSave.form.file) }
+                        request.orders.save(formData).then(res => {
+                            this.formSave.isLoading = false
+                            if (!res.data.orders) { return } // 没返回orders
+                            this.table.rows.unshift(res.data.orders)
+                            this.formSave.form.fileList.length = 0
+                            elForm.resetFields()
+                        }).catch(() => this.formSave.isLoading = false)
+                    })
+                } else { ElMessage({ message: '"单据编号"或"切纸单"不得为空', type: 'warning' }) }
+            }
+        },
+        edit(scope) {
+            this.formSave.form.index = [`序号: ${scope.$index + 1}`]
+            this.formSave.form.id = scope.row.id
+            this.formSave.form.client = scope.row.client
+            this.formSave.form.note = scope.row.note
         },
         delete(row) {
             ElMessageBox.confirm(
@@ -78,6 +102,10 @@ export const useStoreOrders = defineStore('orders', {
                 this.table.rows = res.data.rows.reverse()
             })
         },
+        preview() {
+            this.dialogPreview.show = true
+            this.dialogPreview.url = document.querySelector('img.el-upload-list__item-thumbnail').src
+        }
     },
     getters: { count: state => state.table.rows.length }
 })

@@ -6,13 +6,15 @@ import { mwVerifyToken } from '../middleware/mwVerifyToken.js'
 
 const apiOrders = express.Router()
 
-const idFinish = await Orders.getPropPromise('state', '完成').id
-const filters1 = `("timeLast">${Date.now() - (6 * 3600000)} AND "id_prop_state"='${idFinish}')`
-const filters2 = `"id_prop_state"!='${idFinish}'`
-const filters = `${filters1} OR ${filters2}`
+const idFinish = (await Orders.getPropPromise('state', '完成')).id
+function getFilters() {
+    const filters1 = `("timeLast">${Date.now() - (6 * 3600000)} AND "id_prop_state"='${idFinish}')`
+    const filters2 = `"id_prop_state"!='${idFinish}'`
+    return `${filters1} OR ${filters2}`
+}
 
 apiOrders.get('/list', (req, res) => {
-    Orders.listPromise(0, filters).then(result => {
+    Orders.listPromise(0, getFilters()).then(result => {
         const orders = result.map(row => new Orders(row))
         Promise.all(orders.map(row => row.replaceIdPromise('id_prop_state')).concat(Orders.getPropPromise('state')))
             .then(result => res.send({ rows: orders, state: result[orders.length] }))
@@ -22,7 +24,7 @@ apiOrders.get('/list', (req, res) => {
 
 apiOrders.get('/search/:key/:value', (req, res) => {
     const filtersSearch = `${+req.params.key ? '"gjpId"' : '"client"'}='${req.params.value}'`
-    Orders.listPromise(0, `(${filters}) AND ${filtersSearch}`).then(rows => {
+    Orders.listPromise(0, `(${getFilters()}) AND ${filtersSearch}`).then(rows => {
         if (!rows?.length) { return res.end() }
         const orders = rows.map(row => new Orders(row))
         Promise.all(orders.map(row => row.replaceIdPromise('id_prop_state')))
@@ -37,7 +39,7 @@ apiOrders.post('/save', (req, res) => {
     if (req.files?.length && req.body.client) {
         Orders.getPropPromise('state', '新').then(row => {
             if (!row) { return }
-            const orders = new Orders({ ...req.body, id: req.files[0].filename, id_prop_state: row.id })
+            const orders = new Orders({ ...req.body, id: req.files[0].filename, id_prop_state: row.id, timeLast: null })
             orders.savePromise().then(() => orders.replaceIdPromise('id_prop_state').then(() => {
                 res.send({ orders, elMessage: { message: '成功', type: 'success' } })
             })).catch(result => res.send({ elMessage: { message: result, type: 'error' } }))

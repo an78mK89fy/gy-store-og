@@ -18,29 +18,28 @@ storeOrders.list()
             <Headers v-if="isState.mobile" />
             <el-table :data="table.rows" row-key="id" :expand-row-keys="table.rows.map(row => row.id)"
                 table-layout="auto" height="100%">
-                <el-table-column label="序" type="index" width="40px" />
-                <el-table-column prop="gjpId">
-                    <template #header>单据编号 <el-tag v-text="storeOrders.count" type="info" /></template>
-                </el-table-column>
-                <el-table-column width="68px">
+                <el-table-column label="序" type="index" />
+                <el-table-column>
                     <template #header><el-tag type="info">客户</el-tag></template>
                     <template #default="scope">
-                        <el-tag tepe="warning" v-text="scope.row.client || '-'" type="warning" />
+                        <el-tag tepe="warning" v-text="scope.row.client" type="warning" />
                     </template>
                 </el-table-column>
                 <el-table-column :filters="table.state.map(item => ({ text: item.value, value: item.value }))"
-                    :filter-method="(value, row) => value === row.id_prop_state.value" width="83px">
+                    :filter-method="(value, row) => value === row.id_prop_state.value">
                     <template #header><el-tag type="info">状态</el-tag></template>
                     <template #default="scope"><el-tag v-text="scope.row.id_prop_state.value" /></template>
                 </el-table-column>
                 <el-table-column label="操作" v-if="!isState.mobile">
                     <template #default="scope">
-                        <!-- <el-button type="warning" plain @click="delOrders(scope.row)">修改</el-button> -->
-                        <el-button type="danger" plain :disabled="!isState.login"
+                        <!-- <el-button type="warning" plain :disabled="!isState.login"
+                            @click="storeOrders.edit(scope)">修改</el-button> -->
+                        <el-button type="danger" plain round :disabled="!isState.login"
                             @click="storeOrders.delete(scope.row)">删除</el-button>
                     </template>
                 </el-table-column>
-                <el-table-column label="详" type="expand" fixed="right" width="40px">
+                <el-table-column label="详" type="expand" fixed="right">
+                    <template #header><el-tag v-text="storeOrders.count" type="info" /></template>
                     <template #default="scope">
                         <el-space direction="vertical" alignment="normal">
                             <el-space>
@@ -55,10 +54,10 @@ storeOrders.list()
                                 </el-space>
                                 <el-space wrap size="small">
                                     <el-tooltip content="创建时间">
-                                        <el-tag v-text="toLocaleTime(scope.row.timeCreate)" />
+                                        <el-tag v-text="'创: ' + toLocaleTime(scope.row.timeCreate)" />
                                     </el-tooltip>
                                     <el-tooltip content="最后修改" v-if="scope.row.timeLast">
-                                        <el-tag v-text="toLocaleTime(scope.row.timeLast)" type="warning" />
+                                        <el-tag v-text="'改: ' + toLocaleTime(scope.row.timeLast)" type="warning" />
                                     </el-tooltip>
                                 </el-space>
                             </el-space>

@@ -15,8 +15,8 @@ export const useStoreClient = defineStore('client', {
                 }).catch(() => cb([]))
             }, 800);
         },
-        add(dialog) {
-            if (dialog.client) { request.client.add(dialog.client).then(() => dialog = { show: false, client: '' }) }
+        add() {
+            if (this.dialog.client) { request.client.add(this.dialog.client).then(() => this.dialog.show = false) }
         }
     }
 })
