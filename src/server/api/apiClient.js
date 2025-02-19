@@ -8,15 +8,15 @@ const apiClient = express.Router()
 
 apiClient.post('/add', (req, res) => {
     if (!req.body.client) { return }
-    db.run('BEGIN')
-    req.body.client.split(' ').forEach(name => {
-        const pyfl = pinyin(name, { pattern: 'first', separator: '', toneType: 'none' })
-        db.run(
-            `INSERT OR IGNORE INTO "client"("hidden","id","name","pyfl") VALUES(?,?,?,?)`,
-            [0, crypto.randomUUID(), name, pyfl]
-        )
-    });
-    db.run('COMMIT')
+    db.serialize(() => {
+        req.body.client.split(' ').forEach(name => {
+            const pyfl = pinyin(name, { pattern: 'first', separator: '', toneType: 'none' })
+            db.run(
+                `INSERT OR IGNORE INTO "client"("hidden","id","name","pyfl") VALUES(?,?,?,?)`,
+                [0, crypto.randomUUID(), name, pyfl]
+            )
+        });
+    })
     res.send({ elMessage: { message: '上传成功', type: 'success' } })
 })
 

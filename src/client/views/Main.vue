@@ -3,6 +3,8 @@ import Save from '../components/orders/Save.vue';
 import Headers from '../components/orders/Headers.vue'
 import Menu from '../components/orders/Menu.vue'
 import Client from '../components/orders/menu/Client.vue';
+import State from '../components/orders/State.vue'
+import EditLine from '../components/orders/EditLine.vue';
 import { useStoreOrders } from '../stores/useStoreOrders.js';
 import { isState } from '../utils/isState.js';
 import { toLocaleTime } from '../utils/toLocalTime.js';
@@ -25,6 +27,10 @@ storeOrders.list()
                         <el-tag tepe="warning" v-text="scope.row.client" type="warning" />
                     </template>
                 </el-table-column>
+                <el-table-column>
+                    <template #header><el-tag type="info">创建时间</el-tag></template>
+                    <template #default="scope"><el-tag v-text="toLocaleTime(scope.row.timeCreate)" /></template>
+                </el-table-column>
                 <el-table-column :filters="table.state.map(item => ({ text: item.value, value: item.value }))"
                     :filter-method="(value, row) => value === row.id_prop_state.value">
                     <template #header><el-tag type="info">状态</el-tag></template>
@@ -32,10 +38,12 @@ storeOrders.list()
                 </el-table-column>
                 <el-table-column label="操作" v-if="!isState.mobile">
                     <template #default="scope">
-                        <!-- <el-button type="warning" plain :disabled="!isState.login"
-                            @click="storeOrders.edit(scope)">修改</el-button> -->
-                        <el-button type="danger" plain round :disabled="!isState.login"
-                            @click="storeOrders.delete(scope.row)">删除</el-button>
+                        <el-space>
+                            <el-button type="warning" plain :disabled="!isState.login"
+                                @click="storeOrders.edit(scope)">修改</el-button>
+                            <el-button type="danger" plain round :disabled="!isState.login" size="small"
+                                @click="storeOrders.delete(scope.row)">删除</el-button>
+                        </el-space>
                     </template>
                 </el-table-column>
                 <el-table-column label="详" type="expand" fixed="right">
@@ -43,29 +51,18 @@ storeOrders.list()
                     <template #default="scope">
                         <el-space direction="vertical" alignment="normal">
                             <el-space>
-                                <el-space v-if="(isState.mobile || isState.dev) && isState.login">
-                                    <el-button type="info" @click="storeOrders.state($event, scope.row)">已阅</el-button>
-                                    <el-button type="primary"
-                                        @click="storeOrders.state($event, scope.row)">开切</el-button>
-                                    <el-button type="success"
-                                        @click="storeOrders.state($event, scope.row)">切完</el-button>
-                                    <el-button type="warning"
-                                        @click="storeOrders.state($event, scope.row)">撤销</el-button>
-                                </el-space>
-                                <el-space wrap size="small">
-                                    <el-tooltip content="创建时间">
-                                        <el-tag v-text="'创: ' + toLocaleTime(scope.row.timeCreate)" />
-                                    </el-tooltip>
-                                    <el-tooltip content="最后修改" v-if="scope.row.timeLast">
-                                        <el-tag v-text="'改: ' + toLocaleTime(scope.row.timeLast)" type="warning" />
-                                    </el-tooltip>
-                                </el-space>
+                                <State :scope="scope"></State>
+                                <el-button type="warning" plain @click="storeOrders.showEditLine(scope.row)"
+                                    v-if="scope.row.editLine.length">
+                                    切纸单修改记录<br v-if="isState.mobile">{{
+                                        toLocaleTime(scope.row.editLine[0]?.timeLint) }}
+                                </el-button>
                             </el-space>
                             <div v-if="scope.row.note">
                                 <el-tag type="danger" style="display: inline-flex;">留言</el-tag>&nbsp;<span
                                     v-text="scope.row.note"></span>
                             </div>
-                            <img class="cut" :src="origin + '/upload/' + scope.row.id" :alt="scope.row.id">
+                            <el-image class=" cut" :src="origin + '/upload/' + scope.row.img" :alt="scope.row.img"/>
                         </el-space>
                     </template>
                 </el-table-column>
@@ -79,6 +76,7 @@ storeOrders.list()
             </el-scrollbar>
         </el-aside>
         <Client></Client>
+        <EditLine></EditLine>
     </el-container>
 </template>
 
@@ -91,10 +89,6 @@ storeOrders.list()
         flex-direction: column;
         width: 100%;
         height: calc(100dvh - 16px);
-
-        img.cut {
-            width: 100%;
-        }
     }
 
     .el-aside {

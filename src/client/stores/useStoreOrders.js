@@ -4,37 +4,41 @@ import { request } from '../request/request.js'
 export const useStoreOrders = defineStore('orders', {
     state: () => ({
         table: { state: [], rows: [], isLoading: false }, dialogPreview: { show: false, url: '' },
-        formSave: { isLoading: false, form: { index: [], id: '', client: '', file: {}, fileList: [], note: '' } }
+        formSave: { isLoading: false, form: { index: [], id: false, client: '', file: {}, fileList: [], note: '' } },
+        dialogEditLine: { show: false, row: {} }
     }),
     actions: {
         save(elForm) {
-            if (this.formSave.form.id) {
-                if (!this.formSave.form.client) { return ElMessage({ message: '客户必填', type: 'warning' }) }
-                this.formSave.isLoading = true
-                request.client.query(this.formSave.form.client).then(res => {
-                    if (!res.data.has) { ElMessage({ message: '"客户"不存在' }); return this.formSave.isLoading = false }
-                    const formData = new FormData(elForm.$el)
-                    if (Object.keys(this.formSave.form.file).length) { formData.set('file', this.formSave.form.file) }
-                    if (this.formSave.form.id) { formData.set('id', this.formSave.form.id) }
-                    request.orders.save(formData).then(res => {
-                        this.formSave.isLoading = false
-                        if (!res.data.orders) { return } // 没返回orders
-                        this.table.rows.unshift(res.data.orders)
-                        this.formSave.form.fileList.length = 0
-                        elForm.resetFields()
-                    }).catch(() => this.formSave.isLoading = false)
-                })
-            } else {
+            this.formSave.isLoading = true
+            const formData = new FormData(elForm.$el)
+            if (this.formSave.form.id) { // 修改
+                formData.set('id', this.formSave.form.id)
+                if (this.formSave.form.fileList.length && !formData.get('file')?.name) {
+                    formData.set('file', this.formSave.form.file)
+                }
+                const index = this.formSave.form.index[0].split(' ')[1] - 1
+                if (this.table.rows[index].note === this.formSave.form.note) { formData.delete('note') }
+                if (this.table.rows[index].timeLast) { formData.set('timeLast', this.table.rows[index].timeLast) }
+                if (this.table.rows[index].note === this.formSave.form.note && !this.formSave.form.fileList.length) {
+                    return ElMessage({ message: '内容无修改', type: 'warning' })
+                }
+                request.orders.save(formData).then(res => {
+                    this.formSave.isLoading = false
+                    if (!res.data.row) { return } // 没返回row
+                    this.table.rows[index] = res.data.row
+                    this.formSave.form.fileList.length = 0
+                    elForm.resetFields()
+                }).catch(() => this.formSave.isLoading = false)
+            } else { // 创建
                 if (this.formSave.form.client && this.formSave.form.fileList.length) {
-                    this.formSave.isLoading = true
                     request.client.query(this.formSave.form.client).then(res => {
                         if (!res.data.has) { ElMessage({ message: '"客户"不存在' }); return this.formSave.isLoading = false }
-                        const formData = new FormData(elForm.$el)
                         if (!formData.get('file').name) { formData.set('file', this.formSave.form.file) }
                         request.orders.save(formData).then(res => {
                             this.formSave.isLoading = false
                             if (!res.data.orders) { return } // 没返回orders
                             this.table.rows.unshift(res.data.orders)
+                            console.log(res.data.orders)
                             this.formSave.form.fileList.length = 0
                             elForm.resetFields()
                         }).catch(() => this.formSave.isLoading = false)
@@ -43,6 +47,7 @@ export const useStoreOrders = defineStore('orders', {
             }
         },
         edit(scope) {
+            this.formSave.form.fileList.length = 0
             this.formSave.form.index = [`序号: ${scope.$index + 1}`]
             this.formSave.form.id = scope.row.id
             this.formSave.form.client = scope.row.client
@@ -105,7 +110,11 @@ export const useStoreOrders = defineStore('orders', {
         preview() {
             this.dialogPreview.show = true
             this.dialogPreview.url = document.querySelector('img.el-upload-list__item-thumbnail').src
-        }
+        },
+        showEditLine(row) {
+            this.dialogEditLine.row = row
+            this.dialogEditLine.show = true
+        },
     },
     getters: { count: state => state.table.rows.length }
 })

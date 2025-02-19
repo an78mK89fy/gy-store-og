@@ -2,11 +2,13 @@
 import { useTemplateRef } from 'vue'
 import { useStoreOrders } from '../../stores/useStoreOrders.js'
 import { useStoreClient } from '../../stores/useStoreClient.js'
+import { isState } from '../../utils/isState.js'
 const storeOrders = useStoreOrders(), { dialogPreview, formSave: { form } } = storeOrders
 const { query, dialog: dialogClient } = useStoreClient()
 const elFormRef = useTemplateRef('elFormRef')
 const elUploadRef = useTemplateRef('elUploadRef')
 function uploadFile(file, fileList) {
+    form.file = file
     if (fileList.length > 1) { fileList.shift() }
     setTimeout(() => elFormRef.value.validateField('img'), 0)
 }
@@ -39,21 +41,21 @@ const rules = {
 <template>
     <el-card>
         <el-form ref="elFormRef" :model="form" :rules="rules" label-width="auto" label-position="top">
-            <el-form-item prop="id" v-show="false"><input type="hidden" name="id" :model="form.id"></el-form-item>
-            <el-form-item label="客户" prop="client">
+            <el-form-item prop="id"><input type="hidden" name="id" :model="form.id"></el-form-item>
+            <el-form-item prop="client">
                 <template #label>
-                    <el-space>
-                        客户
+                    <el-space>客户
                         <el-form-item prop="index" v-show="form.id">
                             <el-input-tag v-model="form.index" :max="1" tag-type="warning" size="small"
-                                @remove-tag="elFormRef.resetFields()" />
+                                @remove-tag="() => { elFormRef.resetFields(); form.fileList.length = 0 }" />
                         </el-form-item>
                     </el-space>
                 </template>
                 <el-autocomplete name="client" v-model.trim="form.client" clearable :fetch-suggestions="query"
-                    @select="({ value }) => form.client = value" :trigger-on-focus="false" placeholder="拼音首字母 = 搜索">
-                    <template #append>
-                        <el-button @click="dialogClient.show = true">客户不存在</el-button>
+                    :disabled="!!form.id" @select="({ value }) => form.client = value" :trigger-on-focus="false"
+                    placeholder="拼音首字母 = 搜索">
+                    <template #append v-if="!form.id">
+                        <el-button @click="dialogClient.show = true">客户不存在点此添加</el-button>
                     </template>
                 </el-autocomplete>
             </el-form-item>
@@ -64,13 +66,13 @@ const rules = {
                     :on-change="uploadFile" list-type="picture">
                     <el-space>
                         <el-input @paste="paste" @click.stop placeholder="ctrl+v = 粘贴">
-                            <template #append>
-                                <el-tooltip content="初次使用需授权">
+                            <template #append v-if="!isState.mobile">
+                                <el-tooltip content="需浏览器支持">
                                     <el-button @click.stop="paste">点击粘贴</el-button>
                                 </el-tooltip>
                             </template>
                         </el-input>
-                        <el-button type="primary" plain>本地上传 jpg/png</el-button>
+                        <el-button class="upload" :type="form.id ? 'warning' : 'primary'" plain>本地上传 jpg/png</el-button>
                     </el-space>
                 </el-upload>
             </el-form-item>
@@ -79,8 +81,8 @@ const rules = {
                     :rows="3" />
             </el-form-item>
             <el-form-item>
-                <el-button :type="form.id ? 'warning' : 'primary'" v-text="form.id ? '修改' : '提交'"
-                    @click="storeOrders.save(elFormRef)" style="transition: all 300ms;" />
+                <el-button class="upload" :type="form.id ? 'warning' : 'primary'" v-text="form.id ? '修改' : '提交'"
+                    @click="storeOrders.save(elFormRef)" />
             </el-form-item>
         </el-form>
         <el-dialog v-model="dialogPreview.show">
@@ -89,4 +91,11 @@ const rules = {
     </el-card><br>
 </template>
 
-<style scoped></style>
+<style scoped>
+/* .el-button.upload {
+    transition: all 300ms;
+} */
+.el-form * {
+    transition: all 300ms;
+}
+</style>

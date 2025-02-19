@@ -1,20 +1,14 @@
-import { pinyin } from 'pinyin-pro'
 import { db } from '../database/dbConstructor.js'
+
 class Orders extends (await db.constructorPromise('orders')) {
-    /**
-     * @param {object} params 
-     * @param {string} params.id
-     * @param {string} params.note
-     * @param {number} params.timeCreate
-     * @param {number} params.timeLast
-     * @param {string} params.id_prop_state
-     * @param {string} params.client
-     * @param {string} params.hash
-     */
     constructor(params) {
         super(params)
         this.timeCreate = params.timeCreate || Date.now()
+        if (typeof (params.editLine || undefined) === 'string') { this.editLine = JSON.parse(params.editLine) }
+        else { this.editLine = [] }
     }
+    img2obj() { this.editLine = JSON.parse(this.editLine); return this }
+    img2json() { this.editLine = JSON.stringify(this.editLine); return this }
 }
 
 await Promise.all([

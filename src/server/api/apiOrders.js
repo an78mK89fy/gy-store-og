@@ -1,5 +1,4 @@
 import express from 'express'
-
 import { db } from '../database/dbConstructor.js'
 import { Orders } from '../constructor/orders.js'
 import { mwVerifyToken } from '../middleware/mwVerifyToken.js'
@@ -14,8 +13,8 @@ function getFilters() {
 }
 
 apiOrders.get('/list', (req, res) => {
-    Orders.listPromise(0, getFilters()).then(result => {
-        const orders = result.map(row => new Orders(row))
+    Orders.listPromise(0, getFilters()).then(rows => {
+        const orders = rows.map(row => new Orders(row))
         Promise.all(orders.map(row => row.replaceIdPromise('id_prop_state')).concat(Orders.getPropPromise('state')))
             .then(result => res.send({ rows: orders, state: result[orders.length] }))
             .catch(result => res.send({ elMessage: { message: result, type: 'error' } }))
@@ -36,15 +35,39 @@ apiOrders.get('/search/:key/:value', (req, res) => {
 apiOrders.use(mwVerifyToken) // => 限登陆后操作
 
 apiOrders.post('/save', (req, res) => {
-    if (req.files?.length && req.body.client) {
-        Orders.getPropPromise('state', '新').then(row => {
-            if (!row) { return }
-            const orders = new Orders({ ...req.body, id: req.files[0].filename, id_prop_state: row.id, timeLast: null })
-            orders.savePromise().then(() => orders.replaceIdPromise('id_prop_state').then(() => {
-                res.send({ orders, elMessage: { message: '成功', type: 'success' } })
-            })).catch(result => res.send({ elMessage: { message: result, type: 'error' } }))
+    if (req.body.id) { // 修改
+        if (!(req.files.length || req.body.note)) { return }
+        Orders.findByIdPromise(req.body.id).then(row => {
+            if ((+req.body.timeLast || null) !== row.timeLast) { return res.send({ elMessage: { message: '订单变动，刷新重试', type: 'error' } }) }
+            const timeLint = Date.now()
+            const orders = new Orders({ ...row, timeLast: timeLint })
+            if (req.files.length) { orders.img = req.files[0].filename }
+            if (req.body.note) { orders.note = req.body.note }
+            orders.editLine.unshift({
+                img: req.files.length ? row.img : undefined,
+                note: req.body.note ? row.note : undefined,
+                timeLint
+            })
+            orders.img2json().savePromise().then(() => orders.replaceIdPromise('id_prop_state').then(() => {
+                res.send({ row: orders.img2obj() })
+            }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
+            ).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
         }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
-    } else { res.send({ elMessage: { message: '"单据编号"和"客户"必填', type: 'error' } }) }
+    } else { // 提交
+        if (req.files?.length && req.body.client) {
+            Orders.getPropPromise('state', '新').then(state => {
+                if (!state) { return }
+                db.get('SELECT * FROM "client" WHERE "name"=?', [req.body.client], (err, row) => {
+                    if (err) { return res.send({ elMessage: { message: err.message, type: 'error' } }) }
+                    if (!row) { return }
+                    const orders = new Orders({ ...req.body, img: req.files[0].filename, id_prop_state: state.id })
+                    orders.img2json().savePromise().then(() => orders.replaceIdPromise('id_prop_state').then(() => {
+                        res.send({ orders, elMessage: { message: '成功', type: 'success' } })
+                    })).catch(result => res.send({ elMessage: { message: result, type: 'error' } }))
+                })
+            }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
+        } else { res.send({ elMessage: { message: '"客户"和"切纸单"必填', type: 'error' } }) }
+    }
 })
 
 apiOrders.delete('/del/:id', (req, res) => {
@@ -56,7 +79,7 @@ apiOrders.delete('/del/:id', (req, res) => {
 apiOrders.put('/state', (req, res) => {
     Orders.findByIdPromise(req.body.orders.id).then(row => {
         if (!row) { return }
-        if (!(req.body.orders.timeLast === row.timeLast)) {
+        if (!((req.body.orders.timeLast || null) === row.timeLast)) {
             return res.send({ elMessage: { message: row.hidden ? '订单已删除，刷新重试' : '订单变动，刷新重试', type: 'error' } })
         } // 最后修改时间不一致
         const timeLast = Date.now()

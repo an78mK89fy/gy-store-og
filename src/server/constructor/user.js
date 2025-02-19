@@ -3,15 +3,6 @@ import bcrypt from 'bcrypt'
 import { db } from '../database/dbConstructor.js'
 
 class User extends (await db.constructorPromise('user')) {
-    /**
-    * @param {object} params
-    * @param {string} params.id
-    * @param {string} params.phone
-    * @param {string} params.name
-    * @param {string} params.email
-    * @param {string} params.password
-    * @param {string} params.salt
-    */
     constructor(params) {
         super(params)
     }

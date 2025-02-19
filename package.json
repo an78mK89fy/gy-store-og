@@ -1,7 +1,7 @@
 {
   "name": "gy-store-og",
   "private": true,
-  "version": "Beta_1.1.0",
+  "version": "Beta_1.2.0",
   "type": "module",
   "scripts": {
     "dev": "nodemon src/server/server.js -w src/server",

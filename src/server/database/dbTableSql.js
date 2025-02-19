@@ -20,12 +20,16 @@ export const dbTableSql = [
     // orders
     `CREATE TABLE IF NOT EXISTS "orders"(
         "hidden" TINYINT,
-        "id" CHAR(32) NOT NULL PRIMARY KEY,
+        "id" CHAR(36) NOT NULL PRIMARY KEY,
+        "client" VARCHAR,
+        "img" CHAR(32),
         "note" TEXT,
+        "editLine" TEXT,
         "timeCreate" INTEGER,
         "timeLast" INTEGER,
+        "id_user" CHAR(36),
         "id_prop_state" CHAR(36),
-        "id_client" CHAR(36)
+        "count" TINYINT
     )`,
     // "gjpId" CHAR(19),
     // client
