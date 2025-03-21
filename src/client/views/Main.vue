@@ -2,68 +2,55 @@
 import Save from '../components/orders/Save.vue';
 import Headers from '../components/orders/Headers.vue'
 import Menu from '../components/orders/Menu.vue'
-import Client from '../components/orders/menu/Client.vue';
 import State from '../components/orders/State.vue'
-import EditLine from '../components/orders/EditLine.vue';
 import { useStoreOrders } from '../stores/useStoreOrders.js';
 import { isState } from '../utils/isState.js';
 import { toLocaleTime } from '../utils/toLocalTime.js';
-
-const origin = location.origin
-const storeOrders = useStoreOrders(), { table } = storeOrders
-storeOrders.list()
+const storeOrders = useStoreOrders(), { table, getType } = storeOrders
+storeOrders.list(0)
 </script>
 
 <template>
     <el-container>
         <div class="main">
             <Headers v-if="isState.mobile" />
-            <el-table :data="table.rows" row-key="id" :expand-row-keys="table.rows.map(row => row.id)"
-                table-layout="auto" height="100%">
+            <el-table ref="elOrdersRef" :data="table.rows" row-key="id" table-layout="auto" height="100%"
+                :expand-row-keys="table.rows.map(row => { if (row.id_prop_state.value !== '完成') { return row.id } })">
                 <el-table-column label="序" type="index" />
-                <el-table-column>
-                    <template #header><el-tag type="info">客户</el-tag></template>
+                <el-table-column label="客户" prop="client" />
+                <el-table-column :filters="table.state.map(item => ({ text: item.value, value: item.value }))"
+                    :filter-method="(value, row) => value === row.id_prop_state.value" width="82px">
+                    <template #header><el-tag type="info">状态</el-tag></template>
                     <template #default="scope">
-                        <el-tag tepe="warning" v-text="scope.row.client" type="warning" />
+                        <el-tag v-text="scope.row.id_prop_state.value" :type="getType(scope.row.id_prop_state.value)" />
                     </template>
                 </el-table-column>
-                <el-table-column>
-                    <template #header><el-tag type="info">创建时间</el-tag></template>
-                    <template #default="scope"><el-tag v-text="toLocaleTime(scope.row.timeCreate)" /></template>
+                <el-table-column label="创建时间" width="100px" align="center">
+                    <template #default="scope">
+                        <el-tag class="t" type="info" v-text="toLocaleTime(scope.row.timeCreate)" />
+                    </template>
                 </el-table-column>
-                <el-table-column :filters="table.state.map(item => ({ text: item.value, value: item.value }))"
-                    :filter-method="(value, row) => value === row.id_prop_state.value">
-                    <template #header><el-tag type="info">状态</el-tag></template>
-                    <template #default="scope"><el-tag v-text="scope.row.id_prop_state.value" /></template>
+                <el-table-column label="自提" align="center" v-if="!isState.mobile">
+                    <template #default="scope"><v-text v-text="scope.row.self ? '是' : '否'" /></template>
                 </el-table-column>
-                <el-table-column label="操作" v-if="!isState.mobile">
+                <el-table-column label="操作" align="center" v-if="!isState.mobile">
                     <template #default="scope">
                         <el-space>
                             <el-button type="warning" plain :disabled="!isState.login"
                                 @click="storeOrders.edit(scope)">修改</el-button>
                             <el-button type="danger" plain round :disabled="!isState.login" size="small"
-                                @click="storeOrders.delete(scope.row)">删除</el-button>
+                                @click="storeOrders.delete(scope)">删除</el-button>
                         </el-space>
                     </template>
                 </el-table-column>
-                <el-table-column label="详" type="expand" fixed="right">
-                    <template #header><el-tag v-text="storeOrders.count" type="info" /></template>
+                <el-table-column type="expand">
+                    <template #header>
+                        <el-tooltip content="待办">
+                            <el-tag v-text="storeOrders.count" :type="storeOrders.count ? 'success' : 'info'" />
+                        </el-tooltip>
+                    </template>
                     <template #default="scope">
-                        <el-space direction="vertical" alignment="normal">
-                            <el-space>
-                                <State :scope="scope"></State>
-                                <el-button type="warning" plain @click="storeOrders.showEditLine(scope.row)"
-                                    v-if="scope.row.editLine.length">
-                                    切纸单修改记录<br v-if="isState.mobile">{{
-                                        toLocaleTime(scope.row.editLine[0]?.timeLint) }}
-                                </el-button>
-                            </el-space>
-                            <div v-if="scope.row.note">
-                                <el-tag type="danger" style="display: inline-flex;">留言</el-tag>&nbsp;<span
-                                    v-text="scope.row.note"></span>
-                            </div>
-                            <el-image class=" cut" :src="origin + '/upload/' + scope.row.img" :alt="scope.row.img"/>
-                        </el-space>
+                        <State :scope="scope"></State>
                     </template>
                 </el-table-column>
             </el-table>
@@ -75,8 +62,6 @@ storeOrders.list()
                 <Menu></Menu>
             </el-scrollbar>
         </el-aside>
-        <Client></Client>
-        <EditLine></EditLine>
     </el-container>
 </template>
 
@@ -89,6 +74,10 @@ storeOrders.list()
         flex-direction: column;
         width: 100%;
         height: calc(100dvh - 16px);
+
+        .el-tag.t {
+            font-family: Arial;
+        }
     }
 
     .el-aside {

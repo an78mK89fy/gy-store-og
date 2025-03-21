@@ -2,7 +2,7 @@
 import { useStoreOrders } from '../../stores/useStoreOrders.js';
 import { toLocaleTime } from '../../utils/toLocalTime.js';
 const origin = location.origin
-const storeOrders = useStoreOrders(), { dialogEditLine } = storeOrders
+const { dialogEditLine } = useStoreOrders()
 </script>
 
 <template>

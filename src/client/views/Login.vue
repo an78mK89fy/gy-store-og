@@ -33,68 +33,73 @@ userLogin()
 </script>
 
 <template>
-    <h1 class="title">国友纸业<br>Order Manage System<br>Part.AoGuang</h1>
-    <el-card v-loading="isLoading">
-        <h1>login</h1>
-        <el-form :model="formLogin" label-width="auto" label-position="top">
-            <el-form-item required>
-                <template #label>
-                    <el-space><el-icon><el-icon-user /></el-icon>账户</el-space>
-                </template>
-                <el-input v-model.trim="formLogin.phone" placeholder="手机号" clearable maxlength="11" show-word-limit />
-            </el-form-item>
-            <el-form-item required>
-                <template #label>
-                    <el-space><el-icon><el-icon-lock /></el-icon>密码</el-space>
-                </template>
-                <el-input v-model.trim="formLogin.password" type="password" placeholder="字母Aa-Zz 数字0-9 字符@#$%^&*`~()-+="
-                    clearable show-password minlength="8" maxlength="18" />
-            </el-form-item>
-            <el-form-item>
-                <el-space>
-                    <el-checkbox v-model="formLogin.stay" label="保持登录" />
-                    <el-button link type="info" @click="clearRemenber">清除保存</el-button>
-                </el-space>
-            </el-form-item>
-            <el-form-item>
-                <el-button type="primary" @click="userLogin(formLogin)"
-                    :disabled="!(formLogin.phone && formLogin.password)">登录</el-button>
-                <el-button type="info" @click="request.user.forget">忘记密码</el-button>
-                <RouterLink to="admin" v-if="isState.local" style="margin-left: 36px;">
-                    <el-button type="success">用户管理</el-button>
-                </RouterLink>
-            </el-form-item>
-        </el-form>
-    </el-card>
-    <div class="onlyRead">
-        <RouterLink to="/main">
-            <el-button>仅查看</el-button>
-        </RouterLink>
+    <div class="flex">
+        <h1 class="title">国友纸业<br>Order Manage System<br>Part.AoGuang</h1>
+        <el-card v-loading="isLoading">
+            <h1>login</h1>
+            <el-form :model="formLogin" label-width="auto" label-position="top">
+                <el-form-item required>
+                    <template #label>
+                        <el-space><el-icon><el-icon-user /></el-icon>账户</el-space>
+                    </template>
+                    <el-input v-model.trim="formLogin.phone" placeholder="手机号" clearable maxlength="11"
+                        show-word-limit />
+                </el-form-item>
+                <el-form-item required>
+                    <template #label>
+                        <el-space><el-icon><el-icon-lock /></el-icon>密码</el-space>
+                    </template>
+                    <el-input v-model.trim="formLogin.password" type="password"
+                        placeholder="字母Aa-Zz 数字0-9 字符@#$%^&*`~()-+=" clearable show-password minlength="8"
+                        maxlength="18" />
+                </el-form-item>
+                <el-form-item>
+                    <el-space>
+                        <el-checkbox v-model="formLogin.stay" label="保持登录" />
+                        <el-button link type="info" @click="clearRemenber">清除保存</el-button>
+                    </el-space>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="userLogin(formLogin)"
+                        :disabled="!(formLogin.phone && formLogin.password)">登录</el-button>
+                    <el-button type="info" @click="request.user.forget">忘记密码</el-button>
+                    <RouterLink to="admin" v-if="isState.local" style="margin-left: 36px;">
+                        <el-button type="success">用户管理</el-button>
+                    </RouterLink>
+                </el-form-item>
+            </el-form>
+        </el-card>
+        <div id="icp">
+            <a href="http://beian.miit.gov.cn/" target="_blank">浙ICP备2025151360号-1</a>
+        </div>
     </div>
 </template>
 
 <style scoped>
-h1 {
-    font-family: 'Microsoft YaHei';
-
-    &.title {
-        text-align: center;
-    }
-}
-
-.el-card {
-    width: min(max(30%, 500px), 100%);
-    margin: auto;
-}
-
-a {
-    all: inherit;
-}
-
-div.onlyRead {
+div.flex {
+    height: 100%;
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    align-items: center;
-    height: 8em;
+
+    h1 {
+        font-family: 'Microsoft YaHei';
+
+        &.title {
+            text-align: center;
+        }
+    }
+
+    .el-card {
+        width: min(max(30%, 500px), 100%);
+        margin: auto;
+    }
+
+    div#icp {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+    }
 }
 </style>

@@ -2,19 +2,19 @@ import { defineStore } from 'pinia'
 import { request } from '../request/request.js'
 
 let queryTimer
-export const useStoreClient = defineStore('client', {
+export const useStorePaper = defineStore('paper', {
     state: () => ({
-        dialog: { show: false, client: '' }
+        dialog: { show: false, paper: '' }
     }),
     actions: {
         query(value, cb) {
             clearTimeout(queryTimer)
             queryTimer = setTimeout(() => {
-                request.client.query(value).then(res => {
+                request.paper.query(value).then(res => {
                     cb(res.data.list.map(item => ({ value: item.name })))
                 }).catch(() => cb([]))
             }, 600);
         },
-        add() { if (this.dialog.client) { request.client.add(this.dialog.client).then(() => this.dialog.show = false) } }
+        add() { if (this.dialog.paper) { request.paper.add(this.dialog.paper).then(() => this.dialog.show = false) } }
     }
 })

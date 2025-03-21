@@ -9,6 +9,18 @@ class Orders extends (await db.constructorPromise('orders')) {
     }
     img2obj() { this.editLine = JSON.parse(this.editLine); return this }
     img2json() { this.editLine = JSON.stringify(this.editLine); return this }
+    savePromise() {
+        if ((typeof this.editLine) === 'object') { this.img2json() }
+        this.timeLast = Date.now()
+        return super.savePromise(() => { if ((typeof this.editLine) === 'string') { this.img2obj() } })
+    }
+    getTodoPromise() {
+        return new Promise((resolve, reject) => {
+            db.all(`SELECT * FROM "todo" WHERE "id_orders"=? AND "hidden"=0`, [this.id], (err, rows) => {
+                if (err) { reject(err) } else { this.todo = rows; resolve(rows) }
+            })
+        })
+    }
 }
 
 await Promise.all([

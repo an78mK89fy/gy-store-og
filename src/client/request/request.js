@@ -21,12 +21,31 @@ export const request = {
     orders: {
         save: formData => instance.post('/orders/save', formData),
         delete: id => instance.delete(`/orders/del/${id}`),
-        state: orders => instance.put('/orders/state', { orders }),
         list: filters => instance.get('/orders/list', { params: filters }),
         search: form => instance.get(`/orders/search/${form.key}/${form.value}`),
+        state: {
+            print: id => instance.put('/orders/state/print', { id }),
+            receive: state => instance.put('/orders/state/receive', { state }),
+            over: id => instance.put('/orders/state/over', { id }),
+            back: id => instance.put('/orders/state/back', { id })
+        },
+        todo: {
+            save: form => instance.post('/orders/todo/save', { form }),
+            state: state => instance.put('/orders/todo/state', { state }),
+            progress: id => instance.get('/orders/todo/progress', { params: { id } }),
+            delete: id => instance.delete('/orders/todo/delete', { params: { id } }),
+            commit: {
+                save: data => instance.post('/orders/todo/commit/save', data),
+                delete: id => instance.delete('/orders/todo/commit/delete', { params: { id } })
+            },
+        },
     },
     client: {
         query: pyfl => instance.get('/client/query', { params: { pyfl } }),
         add: client => instance.post('/client/add', { client })
+    },
+    paper: {
+        query: pyfl => instance.get('/paper/query', { params: { pyfl } }),
+        add: paper => instance.post('/paper/add', { paper })
     }
 }

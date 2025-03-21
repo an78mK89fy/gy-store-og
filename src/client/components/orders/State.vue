@@ -1,26 +1,39 @@
 <script setup>
+import Todo from './state/Todo.vue';
 import { isState } from '../../utils/isState.js';
-import { reactive } from 'vue';
-const props = defineProps(['scope'])
-const state = reactive({ count: 0 })
-const storeState = {
-    receive(count) {
-        ElMessageBox.prompt('填写切纸单订单数', `序${props.scope.$index + 1} "${props.scope.row.client}" 订单`, {
-            inputPlaceholder: '订单数',
-            inputType: 'number'
-        }).then(({ value }) => {
+import { toLocaleTime } from '../../utils/toLocalTime.js';
+import { useStoreOrders } from '../../stores/useStoreOrders.js';
+import { useStoreState } from '../../stores/orders/useStoreState.js';
+import { useStoreTodo } from '../../stores/orders/useStoreTodo.js';
+const origin = location.origin
 
-        })
-    }
-}
+const props = defineProps(['scope'])
+const storeOrders = useStoreOrders(), storeState = useStoreState(), storeTodo = useStoreTodo()
 </script>
 
 <template>
-    <el-space v-if="(isState.mobile || isState.dev) && isState.login">
-        <el-button type="info" @click="storeState.receive()">领取</el-button>
-        <el-button type="primary" @click="">开切</el-button>
-        <el-button type="success" @click="">切完</el-button>
-        <el-button type="warning" @click="">撤销</el-button>
+    <el-space direction="vertical" alignment="normal">
+        <el-space>
+            <el-button type="primary" text bg @click.stop="storeState.print(props.scope.row)">
+                <el-icon><el-icon-printer /></el-icon>打印
+            </el-button>
+            <el-space v-if="(isState.mobile || isState.dev) && isState.login">
+                <el-button type="primary" :disabled="props.scope.row.id_prop_state.value === '完成'"
+                    @click="storeTodo.showCut(props.scope)">开切</el-button>
+                <el-button type="success" @click="storeState.over(props.scope.row)"
+                    v-if="!(props.scope.row.id_prop_state.value === '完成') && props.scope.row.count">切完</el-button>
+                <el-button type="danger" @click="storeState.back(props.scope.row)"
+                    v-if="props.scope.row.id_prop_state.value === '完成'">退回</el-button>
+            </el-space>
+            <el-button type="warning" plain @click="storeOrders.showEditLine(props.scope.row)"
+                v-if="props.scope.row.editLine.length" v-text="toLocaleTime(props.scope.row.editLine[0]?.timeLint)" />
+        </el-space>
+        <Todo :scope="props.scope"></Todo>
+        <div v-if="props.scope.row.note">
+            <el-tag type="danger" style="display: inline-flex;">留言</el-tag>
+            &nbsp;<span v-text="props.scope.row.note"></span>
+        </div>
+        <el-image class="cut" :alt="props.scope.row.img" :src="`${origin}/upload/${props.scope.row.img}`" />
     </el-space>
 </template>
 

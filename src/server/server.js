@@ -10,7 +10,6 @@ import { mwSafaFilters } from './middleware/mwSafaFilters.js'
 import { api } from './api/api.js'
 
 const app = express();
-
 const dest = path.join(import.meta.dirname, '../../data/temp')
 const upload = multer({ dest })
 
@@ -27,6 +26,4 @@ app.use('/upload', express.static(dest, { index: false }))
 app.use('/api', api)
 
 const port = process.env.SEV_PORT || 3000
-ViteExpress.listen(app, port, () => console.log(
-  `[ctrl] + [鼠标左键] 点击链接去管理用户 http://localhost:${port}/#/admin`
-))
+ViteExpress.listen(app, port, () => console.log(`[ctrl] + [鼠标左键] 点击链接去管理用户 http://localhost:${port}/#/admin`))

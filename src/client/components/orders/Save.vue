@@ -40,7 +40,7 @@ const rules = {
 
 <template>
     <el-card>
-        <el-form ref="elFormRef" :model="form" :rules="rules" label-width="auto" label-position="top">
+        <el-form ref="elFormRef" :model="form" :rules="rules" label-position="top">
             <el-form-item prop="id"><input type="hidden" name="id" :model="form.id"></el-form-item>
             <el-form-item prop="client">
                 <template #label>
@@ -53,21 +53,21 @@ const rules = {
                 </template>
                 <el-autocomplete name="client" v-model.trim="form.client" clearable :fetch-suggestions="query"
                     :disabled="!!form.id" @select="({ value }) => form.client = value" :trigger-on-focus="false"
-                    placeholder="拼音首字母 = 搜索">
+                    :debounce="0" placeholder="拼音首字母 = 搜索">
                     <template #append v-if="!form.id">
                         <el-button @click="dialogClient.show = true">客户不存在点此添加</el-button>
                     </template>
                 </el-autocomplete>
             </el-form-item>
-            <el-form-item label="切纸单" prop="img">
+            <el-form-item prop="img">
                 <template #label>切纸单<el-button type="primary" round text v-show="form.fileList.length" size="small"
                         @click="storeOrders.preview">预览</el-button></template>
                 <el-upload ref="elUploadRef" v-model:file-list="form.fileList" :auto-upload="false"
-                    :on-change="uploadFile" list-type="picture">
+                    :on-change="uploadFile" :on-preview="storeOrders.preview" list-type="picture">
                     <el-space>
                         <el-input @paste="paste" @click.stop placeholder="ctrl+v = 粘贴">
                             <template #append v-if="!isState.mobile">
-                                <el-tooltip content="需浏览器支持">
+                                <el-tooltip content="win7暂不支持">
                                     <el-button @click.stop="paste">点击粘贴</el-button>
                                 </el-tooltip>
                             </template>
@@ -80,21 +80,21 @@ const rules = {
                 <el-input type="textarea" name="note" v-model.trim="form.note" resize="none" placeholder="选填"
                     :rows="3" />
             </el-form-item>
-            <el-form-item>
-                <el-button class="upload" :type="form.id ? 'warning' : 'primary'" v-text="form.id ? '修改' : '提交'"
-                    @click="storeOrders.save(elFormRef)" />
+            <el-form-item prop="self">
+                <el-space>
+                    <el-button class="upload" :type="form.id ? 'warning' : 'primary'" v-text="form.id ? '修改' : '提交'"
+                        @click="storeOrders.save(elFormRef)" />
+                    <!-- <el-tag :type="form.id ? 'warning' : 'primary'"> -->
+                    <el-checkbox v-model="form.self" label="自提" value="1" name="self" border />
+                    <!-- </el-tag> -->
+                </el-space>
             </el-form-item>
         </el-form>
-        <el-dialog v-model="dialogPreview.show">
-            <el-image :src="dialogPreview.url"></el-image>
-        </el-dialog>
+        <el-dialog v-model="dialogPreview.show"><el-image :src="dialogPreview.url" /></el-dialog>
     </el-card><br>
 </template>
 
 <style scoped>
-/* .el-button.upload {
-    transition: all 300ms;
-} */
 .el-form * {
     transition: all 300ms;
 }

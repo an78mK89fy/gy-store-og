@@ -103,7 +103,7 @@ db.constructorPromise = (tableName) => new Promise(resolve => {
                     )
                 })
             }
-            savePromise() {
+            savePromise(cb = () => { }) {
                 return new Promise((resolve, reject) => {
                     if (this.id) {
                         db.get(`SELECT "id" FROM "${tableName}" WHERE "id"=?`, [this.id], (err, row) => {
@@ -116,15 +116,15 @@ db.constructorPromise = (tableName) => new Promise(resolve => {
                                 const setCols = columnNames.map(column => `"${column}"=${setValue(this[column])}`).join()
                                 db.run(
                                     `UPDATE "${tableName}" SET ${setCols} WHERE "id"=?`,
-                                    [this.id], err => err ? reject(err) : resolve()
+                                    [this.id], err => { if (err) { reject(err) } else { cb(); resolve() } }
                                 )
                             } else { //创建
                                 const InsertCols = columnNames.map(column => `"${column}"`).join()
                                 const InsertQ = Array(columnNames.length).fill('?').join()
                                 db.run(
-                                    `INSERT INTO ${tableName}(${InsertCols}) VALUES(${InsertQ})`,
+                                    `INSERT INTO "${tableName}"(${InsertCols}) VALUES(${InsertQ})`,
                                     columnNames.map(column => this[column]),
-                                    err => err ? reject(err) : resolve()
+                                    err => { if (err) { reject(err) } else { cb(); resolve() } }
                                 )
                             }
                         })

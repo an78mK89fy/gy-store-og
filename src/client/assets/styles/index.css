@@ -1,0 +1,3 @@
+div#app {
+    height: calc(100dvh - 32px);
+}

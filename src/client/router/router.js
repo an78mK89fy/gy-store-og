@@ -1,8 +1,8 @@
 import { createRouter, createWebHashHistory, createMemoryHistory } from 'vue-router'
 
 import Login from '../views/Login.vue'
-import Main from '../views/Main.vue'
 import Admin from '../views/Admin.vue'
+import Main from '../views/Main.vue'
 
 import { isState } from '../utils/isState.js'
 

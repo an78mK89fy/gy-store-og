@@ -29,14 +29,45 @@ export const dbTableSql = [
         "timeLast" INTEGER,
         "id_user" CHAR(36),
         "id_prop_state" CHAR(36),
-        "count" TINYINT
+        "count" INTEGER,
+        "store" CHAR(2),
+        "self" TINYINT
     )`,
     // "gjpId" CHAR(19),
     // client
     `CREATE TABLE IF NOT EXISTS "client"(
         "hidden" TINYINT,
-        "id" CHAR(32) NOT NULL PRIMARY KEY,
+        "id" CHAR(36) NOT NULL PRIMARY KEY,
         "name" VARCHAR UNIQUE NOT NULL,
         "pyfl" VARCHAR NOT NULL
-    )`
+    )`,
+    // paper
+    `CREATE TABLE IF NOT EXISTS "paper"(
+        "hidden" TINYINT,
+        "id" CHAR(36) NOT NULL PRIMARY KEY,
+        "name" VARCHAR UNIQUE NOT NULL,
+        "pyfl" VARCHAR NOT NULL
+    )`,
+    // todo
+    `CREATE TABLE IF NOT EXISTS "todo"(
+        "hidden" TINYINT,
+        "id" CHAR(36) NOT NULL PRIMARY KEY,
+        "id_orders" CHAR(36),
+        "paper" TEXT,
+        "grammage" INTEGER,
+        "width" INTEGER,
+        "length" INTEGER,
+        "count" INTEGER,
+        "state" VARCHAR,
+        ""progress" INTEGER
+    )`,
+    // commit
+    `CREATE TABLE IF NOT EXISTS "commit"(
+        "hidden" TINYINT,
+        "id" CHAR(36) NOT NULL PRIMARY KEY,
+        "id_todo" CHAR(36),
+        "count" TINYINT,
+        "img" CHAR(32),
+        "timeCreate" INTEGER
+    )`,
 ]

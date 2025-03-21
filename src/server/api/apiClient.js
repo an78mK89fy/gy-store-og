@@ -21,7 +21,7 @@ apiClient.post('/add', (req, res) => {
 })
 
 apiClient.get('/query', (req, res) => {
-    if (!req.query) { return }
+    if (!req.query?.pyfl) { return }
     db.get(`SELECT * FROM "client" WHERE "name"=?`, [req.query.pyfl], (err, row) => {
         if (err) { return res.send({ elMessage: { message: err.message, type: 'error' } }) }
         if (row) { res.send({ has: 1 }) } else {
