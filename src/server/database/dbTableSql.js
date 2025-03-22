@@ -59,7 +59,7 @@ export const dbTableSql = [
         "length" INTEGER,
         "count" INTEGER,
         "state" VARCHAR,
-        ""progress" INTEGER
+        "progress" INTEGER
     )`,
     // commit
     `CREATE TABLE IF NOT EXISTS "commit"(
