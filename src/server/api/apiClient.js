@@ -25,7 +25,8 @@ apiClient.get('/query', (req, res) => {
     db.get(`SELECT * FROM "client" WHERE "name"=?`, [req.query.pyfl], (err, row) => {
         if (err) { return res.send({ elMessage: { message: err.message, type: 'error' } }) }
         if (row) { res.send({ has: 1 }) } else {
-            db.all(`SELECT * FROM "client" WHERE "pyfl" LIKE ?`, [`%${req.query.pyfl}%`], (err, rows) => {
+            const isPyfl = pinyin(req.query.pyfl, { pattern: 'first', separator: '', toneType: 'none' }) === req.query.pyfl
+            db.all(`SELECT * FROM "client" WHERE "${isPyfl ? 'pyfl' : 'name'}" LIKE ?`, [`%${req.query.pyfl}%`], (err, rows) => {
                 if (err) { return res.send({ elMessage: { message: err.message, type: 'error' } }) }
                 res.send({ list: rows, elMessage: rows.length ? undefined : { message: '无此客户', type: 'warning' } })
             })

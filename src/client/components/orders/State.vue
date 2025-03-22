@@ -9,6 +9,7 @@ const origin = location.origin
 
 const props = defineProps(['scope'])
 const storeOrders = useStoreOrders(), storeState = useStoreState(), storeTodo = useStoreTodo()
+const disCut = (row) => row.id_prop_state.value === '完成' || row.count ? row.todo.length >= row.count : false
 </script>
 
 <template>
@@ -18,7 +19,7 @@ const storeOrders = useStoreOrders(), storeState = useStoreState(), storeTodo = 
                 <el-icon><el-icon-printer /></el-icon>打印
             </el-button>
             <el-space v-if="(isState.mobile || isState.dev) && isState.login">
-                <el-button type="primary" :disabled="props.scope.row.id_prop_state.value === '完成'"
+                <el-button type="primary" :disabled="disCut(props.scope.row)"
                     @click="storeTodo.showCut(props.scope)">开切</el-button>
                 <el-button type="success" @click="storeState.over(props.scope.row)"
                     v-if="!(props.scope.row.id_prop_state.value === '完成') && props.scope.row.count">切完</el-button>

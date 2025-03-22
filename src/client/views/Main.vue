@@ -31,7 +31,7 @@ storeOrders.list(0)
                     </template>
                 </el-table-column>
                 <el-table-column label="自提" align="center" v-if="!isState.mobile">
-                    <template #default="scope"><v-text v-text="scope.row.self ? '是' : '否'" /></template>
+                    <template #default="scope"><el-text v-text="scope.row.self ? '是' : '否'" /></template>
                 </el-table-column>
                 <el-table-column label="操作" align="center" v-if="!isState.mobile">
                     <template #default="scope">
