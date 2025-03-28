@@ -53,7 +53,7 @@ apiOrders.post('/save', (req, res) => {
             })
             orders.savePromise().then(() => orders.replaceIdPromise('id_prop_state').then(() => {
                 res.send({ row: orders })
-                wecom.og({ type: '【改】', client: orders.client, img: orders.img })
+                // wecom.og.img()
             }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
             ).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
         }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
@@ -67,7 +67,7 @@ apiOrders.post('/save', (req, res) => {
                     const orders = new Orders({ ...req.body, img: req.files[0].filename, id_prop_state: state.id })
                     orders.savePromise().then(() => orders.replaceIdPromise('id_prop_state').then(() => {
                         res.send({ orders, elMessage: { message: '成功', type: 'success' } })
-                        wecom.og({ type: '【新】', client: orders.client, img: orders.img })
+                        wecom.og.img({ img: orders.img })
                     })).catch(result => res.send({ elMessage: { message: result, type: 'error' } }))
                 })
             }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
