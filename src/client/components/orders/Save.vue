@@ -41,7 +41,7 @@ const rules = {
 <template>
     <el-card>
         <el-form ref="elFormRef" :model="form" :rules="rules" label-position="top">
-            <el-form-item prop="id"><input type="hidden" name="id" :model="form.id"></el-form-item>
+            <el-form-item v-show="false" prop="id"><input type="hidden" name="id" :model="form.id"></el-form-item>
             <el-form-item prop="client">
                 <template #label>
                     <el-space>客户
@@ -55,7 +55,11 @@ const rules = {
                     :disabled="!!form.id" @select="({ value }) => form.client = value" :trigger-on-focus="false"
                     :debounce="0" placeholder="拼音首字母 = 搜索">
                     <template #append v-if="!form.id">
-                        <el-button @click="dialogClient.show = true">客户不存在点此添加</el-button>
+                        <el-button @click="dialogClient.show = true">
+                            <el-space>
+                                <el-icon><el-icon-user /></el-icon>添加客户
+                            </el-space>
+                        </el-button>
                     </template>
                 </el-autocomplete>
             </el-form-item>
@@ -80,13 +84,18 @@ const rules = {
                 <el-input type="textarea" name="note" v-model.trim="form.note" resize="none" placeholder="选填"
                     :rows="3" />
             </el-form-item>
-            <el-form-item prop="self">
+            <!-- <el-form-item label="仓库" required>
+                <el-radio-group modelValue="ag">
+                    <el-radio value="ag">奥光</el-radio>
+                    <el-radio value="zx">中心</el-radio>
+                    <el-radio value="wc">旺厂</el-radio>
+                </el-radio-group>
+            </el-form-item> -->
+            <el-form-item>
                 <el-space>
                     <el-button class="upload" :type="form.id ? 'warning' : 'primary'" v-text="form.id ? '修改' : '提交'"
                         @click="storeOrders.save(elFormRef)" />
-                    <!-- <el-tag :type="form.id ? 'warning' : 'primary'"> -->
                     <el-checkbox v-model="form.self" label="自提" value="1" name="self" border />
-                    <!-- </el-tag> -->
                 </el-space>
             </el-form-item>
         </el-form>

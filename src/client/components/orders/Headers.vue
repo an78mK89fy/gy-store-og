@@ -19,7 +19,7 @@ const user = {
     }
 }
 // 搜索
-const formSearch = reactive({ key: '0', value: '' })
+const formSearch = reactive({ key: 'client', value: '' })
 // 改密码
 const dialogPswd = reactive({ show: false, form: { old: '', new: '', password: '' } })
 user.forget = form => {

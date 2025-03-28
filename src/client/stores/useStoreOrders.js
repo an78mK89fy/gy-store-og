@@ -83,7 +83,7 @@ export const useStoreOrders = defineStore('orders', {
         search(form) {
             if (!form.value) { return this.list(true) }
             this.table.isLoading = true
-            request.orders.search(form).then(res => {
+            request.orders.list(form).then(res => {
                 this.table.isLoading = false
                 if (!res.data.rows) { return }
                 this.table.rows = res.data.rows.reverse()

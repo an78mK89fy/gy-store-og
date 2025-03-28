@@ -41,25 +41,21 @@ export const dbTableSql = [
         "name" VARCHAR UNIQUE NOT NULL,
         "pyfl" VARCHAR NOT NULL
     )`,
-    // paper
-    `CREATE TABLE IF NOT EXISTS "paper"(
-        "hidden" TINYINT,
-        "id" CHAR(36) NOT NULL PRIMARY KEY,
-        "name" VARCHAR UNIQUE NOT NULL,
-        "pyfl" VARCHAR NOT NULL
-    )`,
+    // // paper
+    // `CREATE TABLE IF NOT EXISTS "paper"(
+    //     "hidden" TINYINT,
+    //     "id" CHAR(36) NOT NULL PRIMARY KEY,
+    //     "name" VARCHAR UNIQUE NOT NULL,
+    //     "pyfl" VARCHAR NOT NULL
+    // )`,
     // todo
     `CREATE TABLE IF NOT EXISTS "todo"(
         "hidden" TINYINT,
         "id" CHAR(36) NOT NULL PRIMARY KEY,
         "id_orders" CHAR(36),
-        "paper" TEXT,
-        "grammage" INTEGER,
-        "width" INTEGER,
-        "length" INTEGER,
+        "index" TINYINT,
         "count" INTEGER,
-        "state" VARCHAR,
-        "progress" INTEGER
+        "state" VARCHAR
     )`,
     // commit
     `CREATE TABLE IF NOT EXISTS "commit"(

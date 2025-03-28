@@ -22,7 +22,6 @@ export const request = {
         save: formData => instance.post('/orders/save', formData),
         delete: id => instance.delete(`/orders/del/${id}`),
         list: filters => instance.get('/orders/list', { params: filters }),
-        search: form => instance.get(`/orders/search/${form.key}/${form.value}`),
         state: {
             print: id => instance.put('/orders/state/print', { id }),
             receive: state => instance.put('/orders/state/receive', { state }),

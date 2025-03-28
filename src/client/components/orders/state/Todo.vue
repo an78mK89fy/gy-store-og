@@ -1,16 +1,14 @@
 <script setup>
-import { concatPaper } from '../../../utils/concatPaper.js';
 import { isState } from '../../../utils/isState.js';
 import { useStoreOrders } from '../../../stores/useStoreOrders.js';
 import { useStoreState } from '../../../stores/orders/useStoreState.js';
 import { useStoreTodo } from '../../../stores/orders/useStoreTodo.js';
-import { useStoreCommit } from '../../../stores/orders/useStoreCommit.js'
 const props = defineProps(['scope'])
-const { getType } = useStoreOrders(), storeState = useStoreState(), storeTodo = useStoreTodo(), storeCommit = useStoreCommit()
+const { getType } = useStoreOrders(), storeState = useStoreState(), storeTodo = useStoreTodo()
 </script>
 
 <template>
-    <el-collapse v-if="props.scope.row.count">
+    <el-collapse v-if="props.scope.row.count" @change="">
         <el-collapse-item :title="`进度: ${props.scope.row.todo?.length ?? 0} / ${props.scope.row.count}`">
             <template #title>
                 <el-space>
@@ -24,13 +22,11 @@ const { getType } = useStoreOrders(), storeState = useStoreState(), storeTodo = 
                 <el-text class="icon-ele" type="primary" v-text="isActive ? '点击收起 -' : '展开详情 +'" />
             </template>
             <el-table :data="props.scope.row.todo" table-layout="auto" row-key="id">
-                <el-table-column label="状态" width="66px">
+                <el-table-column label="切" prop="index" />
+                <el-table-column label="状态">
                     <template #default="scope">
                         <el-text v-text="scope.row.state" :type="getType(scope.row.state)" />
                     </template>
-                </el-table-column>
-                <el-table-column label="纸张">
-                    <template #default="scope"><el-text v-text="concatPaper(scope.row)" /></template>
                 </el-table-column>
                 <el-table-column label="张数(进度)" align="center">
                     <template #default="scope">

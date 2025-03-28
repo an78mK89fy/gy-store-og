@@ -9,14 +9,16 @@ apiTodo.use('/commit', apiCommit)
 
 apiTodo.post('/save', (req, res) => {
     try {
-        if (!(req.body.form.id_orders && req.body.form.paper && req.body.form.grammage && req.body.form.width && req.body.form.length && req.body.form.count)) { return }
-        if (req.body.form.id_todo) { // 修改
-            Todo.findByIdPromise(req.body.form.id_todo).then(row => {
-                const todo = new Todo({ ...row, ...req.body.form })
+        const form = req.body.form
+        console.log(form)
+        if (!(form.id_orders && form.index && form.count)) { return }
+        if (form.id_todo) { // 修改
+            Todo.findByIdPromise(form.id_todo).then(row => {
+                const todo = new Todo({ ...row, ...form })
                 todo.savePromise().then(() => res.send({ todo, elMessage: { message: '修改成功', type: 'success' } }))
             })
         } else { // 创建
-            const todo = new Todo({ ...req.body.form, state: '进行中' })
+            const todo = new Todo({ ...form, state: '进行中' })
             todo.savePromise().then(() => {
                 Orders.getPropPromise('state', '进行中').then(row => {
                     db.run('UPDATE "orders" SET "id_prop_state"=? WHERE "id"=?', [row.id, todo.id_orders], err => {

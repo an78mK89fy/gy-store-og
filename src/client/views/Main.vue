@@ -1,11 +1,11 @@
 <script setup>
 import Save from '../components/orders/Save.vue';
 import Headers from '../components/orders/Headers.vue'
-import Menu from '../components/orders/Menu.vue'
+// import Menu from '../components/orders/Menu.vue'
 import State from '../components/orders/State.vue'
 import { useStoreOrders } from '../stores/useStoreOrders.js';
 import { isState } from '../utils/isState.js';
-import { toLocaleTime } from '../utils/toLocalTime.js';
+// import { toLocaleTime } from '../utils/toLocalTime.js';
 const storeOrders = useStoreOrders(), { table, getType } = storeOrders
 storeOrders.list(0)
 </script>
@@ -19,21 +19,21 @@ storeOrders.list(0)
                 <el-table-column label="序" type="index" />
                 <el-table-column label="客户" prop="client" />
                 <el-table-column :filters="table.state.map(item => ({ text: item.value, value: item.value }))"
-                    :filter-method="(value, row) => value === row.id_prop_state.value" width="82px">
+                    :filter-method="(value, row) => value === row.id_prop_state.value">
                     <template #header><el-tag type="info">状态</el-tag></template>
                     <template #default="scope">
                         <el-tag v-text="scope.row.id_prop_state.value" :type="getType(scope.row.id_prop_state.value)" />
                     </template>
                 </el-table-column>
-                <el-table-column label="创建时间" width="100px" align="center">
+                <!-- <el-table-column label="创建时间" align="center">
                     <template #default="scope">
                         <el-tag class="t" type="info" v-text="toLocaleTime(scope.row.timeCreate)" />
                     </template>
-                </el-table-column>
+                </el-table-column> -->
                 <el-table-column label="自提" align="center" v-if="!isState.mobile">
                     <template #default="scope"><el-text v-text="scope.row.self ? '是' : '否'" /></template>
                 </el-table-column>
-                <el-table-column label="操作" align="center" v-if="!isState.mobile">
+                <!-- <el-table-column label="操作" align="center" v-if="!isState.mobile">
                     <template #default="scope">
                         <el-space>
                             <el-button type="warning" plain :disabled="!isState.login"
@@ -42,7 +42,7 @@ storeOrders.list(0)
                                 @click="storeOrders.delete(scope)">删除</el-button>
                         </el-space>
                     </template>
-                </el-table-column>
+                </el-table-column> -->
                 <el-table-column type="expand">
                     <template #header>
                         <el-tooltip content="待办">
@@ -59,7 +59,7 @@ storeOrders.list(0)
             <Headers v-if="!isState.mobile" style="margin-bottom: 8px;" />
             <el-scrollbar>
                 <Save v-if="isState.login" />
-                <Menu></Menu>
+                <!-- <Menu></Menu> -->
             </el-scrollbar>
         </el-aside>
     </el-container>
@@ -72,7 +72,7 @@ storeOrders.list(0)
     div.main {
         display: flex;
         flex-direction: column;
-        width: 100%;
+        width: min(500px, 100%);
         height: calc(100dvh - 16px);
 
         .el-tag.t {

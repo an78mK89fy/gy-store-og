@@ -8,15 +8,17 @@ import { wecom } from '../transmitter/wecom.js'
 const apiOrders = express.Router()
 
 const idFinish = (await Orders.getPropPromise('state', '完成')).id
-function getFilters() {
-    const filters1 = `("timeLast">${Date.now() - (6 * 3600000)} AND "id_prop_state"='${idFinish}')`
-    const filters2 = `"id_prop_state"!='${idFinish}'`
-    return `${filters1} OR ${filters2}`
-}
 
 apiOrders.get('/list', (req, res) => {
+    function getFilters(query) {
+        const filters1 = `("timeLast">${Date.now() - (6 * 3600000)} AND "id_prop_state"='${idFinish}')`
+        const filters2 = `"id_prop_state"!='${idFinish}'`
+        const filters = `${filters1} OR ${filters2}`
+        if (query.key) { return `${filters} AND "${query.key}"='${query.value}'` }
+        else { return filters }
+    }
     try {
-        Orders.listPromise(0, getFilters()).then(rows => {
+        Orders.listPromise(0, getFilters(req.query)).then(rows => {
             const orders = rows.map(row => new Orders(row))
             Promise.all(
                 orders.map(row => row.replaceIdPromise('id_prop_state'))
@@ -32,23 +34,6 @@ apiOrders.get('/list', (req, res) => {
         })
     }
     catch ({ message }) { res.send({ elMessage: { message, type: 'error' } }) }
-})
-
-apiOrders.get('/search/:key/:value', (req, res) => {
-    const filtersSearch = `${+req.params.key ? '"gjpId"' : '"client"'}='${req.params.value}'`
-    Orders.listPromise(0, `(${getFilters()}) AND ${filtersSearch}`).then(rows => {
-        if (!rows?.length) { return res.end() }
-        const orders = rows.map(row => new Orders(row))
-        Promise.all(orders.map(row => row.replaceIdPromise('id_prop_state')))
-            .then(() => Promise.all(orders.map(row => row.getTodoPromise())).then(() => {
-                Promise.all(orders.map(row => new Promise((resolve, reject) => {
-                    db.get(`SELECT "name" FROM "user" WHERE "id"=?`, [row.id_user], (err, user) => {
-                        if (err) { reject(err) } else { row.id_user = user ? user.name : undefined; resolve(row) }
-                    })
-                }))).then(() => res.send({ rows: orders }))
-            }))
-            .catch(result => res.send({ elMessage: { message: result, type: 'error' } }))
-    }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
 })
 
 apiOrders.post('/save', (req, res) => {
