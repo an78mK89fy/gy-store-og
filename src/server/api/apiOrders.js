@@ -16,8 +16,7 @@ apiOrders.get('/list', (req, res) => {
         const filters = `${filters1} OR ${filters2}`
         if (query.key) { return `${filters} AND "${query.key}"='${query.value}'` }
         else { return filters }
-    }
-    try {
+    } try {
         Orders.listPromise(0, getFilters(req.query)).then(rows => {
             const orders = rows.map(row => new Orders(row))
             Promise.all(
@@ -52,11 +51,17 @@ apiOrders.post('/save', (req, res) => {
                 timeLint
             })
             orders.savePromise().then(() => orders.replaceIdPromise('id_prop_state').then(() => {
-                res.send({ row: orders })
-                // wecom.og.img()
-            }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
-            ).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
-        }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
+                db.get('SELECT "name" FROM "user" WHERE "id"=?', [orders.id_user], (err, user) => {
+                    if (err) { return res.send({ elMessage: { message: err.message, type: 'error' } }) }
+                    orders.id_user = user?.name; res.send({ row: orders })
+                    wecom.news({
+                        hooks: process.env.SEV_WECOM_HOOKS_OG_ORDERS,
+                        title: `*变动: ${orders.client}`, path: `?${orders.id}#id`,
+                        description: `[状态] ${orders.id_prop_state.value}; ${orders.note}`
+                    })
+                })
+            })).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
+        }).catch(({ message }) => { res.send({ elMessage: { message, type: 'error' } }) })
     } else { // 提交
         if (req.files?.length && req.body.client) {
             Orders.getPropPromise('state', '新').then(state => {
@@ -67,7 +72,7 @@ apiOrders.post('/save', (req, res) => {
                     const orders = new Orders({ ...req.body, img: req.files[0].filename, id_prop_state: state.id })
                     orders.savePromise().then(() => orders.replaceIdPromise('id_prop_state').then(() => {
                         res.send({ orders, elMessage: { message: '成功', type: 'success' } })
-                        wecom.og.img({ img: orders.img })
+                        wecom.img({ hooks: process.env.SEV_WECOM_HOOKS_OG_ORDERS, img: orders.img })
                     })).catch(result => res.send({ elMessage: { message: result, type: 'error' } }))
                 })
             }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
@@ -75,10 +80,24 @@ apiOrders.post('/save', (req, res) => {
     }
 })
 
-apiOrders.delete('/del/:id', (req, res) => {
-    db.run(`UPDATE "orders" SET "hidden"=1,"timeLast"=? WHERE "id"=?`, [Date.now(), req.params.id], err => {
-        err ? res.send({ elMessage: { message: err.message, type: 'error' } }) : res.end()
-    })
+apiOrders.delete('/del', (req, res) => {
+    if (!req.query.id) { return }
+    Orders.findByIdPromise(req.query.id).then(row => {
+        if (!row) { return }
+        const orders = new Orders({ ...row, timeLast: Date.now(), hidden: 1 })
+        orders.savePromise().then(() => orders.replaceIdPromise('id_prop_state').then(() => {
+            res.end(); wecom.news({
+                hooks: process.env.SEV_WECOM_HOOKS_OG_ORDERS,
+                title: `x取消: ${orders.client}`, path: `?${orders.id}#id`,
+                description: `[状态] ${orders.id_prop_state.value}; ${orders.note}`
+            })
+        }))
+    }).catch(({ message }) => res.send({ elMessage: { message, type: 'error' } }))
+})
+
+apiOrders.get('/id', (req, res) => {
+    if (!req.query.id) { return }
+    Orders.findByIdPromise(req.query.id).then(row => res.send({ row: new Orders(row) }))
 })
 
 apiOrders.use('/state', apiState)

@@ -20,8 +20,9 @@ export const request = {
     },
     orders: {
         save: formData => instance.post('/orders/save', formData),
-        delete: id => instance.delete(`/orders/del/${id}`),
+        delete: id => instance.delete(`/orders/del`, { params: { id } }),
         list: filters => instance.get('/orders/list', { params: filters }),
+        id: id => instance.get('/orders/id', { params: { id } }),
         state: {
             print: id => instance.put('/orders/state/print', { id }),
             receive: state => instance.put('/orders/state/receive', { state }),
@@ -41,10 +42,7 @@ export const request = {
     },
     client: {
         query: pyfl => instance.get('/client/query', { params: { pyfl } }),
+        has: name => instance.get('/client/has', { params: { name } }),
         add: client => instance.post('/client/add', { client })
     },
-    paper: {
-        query: pyfl => instance.get('/paper/query', { params: { pyfl } }),
-        add: paper => instance.post('/paper/add', { paper })
-    }
 }

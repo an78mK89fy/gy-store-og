@@ -8,7 +8,6 @@ import { useStoreTodo } from '../../stores/orders/useStoreTodo.js';
 const origin = location.origin
 const { scope } = defineProps(['scope'])
 const storeOrders = useStoreOrders(), storeState = useStoreState(), storeTodo = useStoreTodo()
-const disCut = (row) => row.id_prop_state.value === '完成' || row.count ? row.todo.length >= row.count : false
 </script>
 
 <template>
@@ -22,7 +21,8 @@ const disCut = (row) => row.id_prop_state.value === '完成' || row.count ? row.
             <el-button type="danger" plain round :disabled="!isState.login" v-if="!isState.mobile" size="small"
                 @click="storeOrders.delete(scope)">删除</el-button>
             <el-space v-if="(isState.mobile || isState.dev) && isState.login">
-                <el-button type="primary" :disabled="disCut(scope.row)" @click="storeTodo.showCut(scope)">开切</el-button>
+                <el-button type="primary" :disabled="scope.row.id_prop_state.value === '完成'"
+                    @click="storeTodo.showCut(scope)">开切</el-button>
                 <el-button type="success" @click="storeState.over(scope.row)"
                     v-if="!(scope.row.id_prop_state.value === '完成') && scope.row.count">切完</el-button>
                 <el-button type="danger" @click="storeState.back(scope.row)"

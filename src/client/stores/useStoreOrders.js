@@ -33,8 +33,8 @@ export const useStoreOrders = defineStore('orders', {
                 }).catch(() => this.formSave.isLoading = false)
             } else { // 创建
                 if (this.formSave.form.client && this.formSave.form.fileList.length) {
-                    request.client.query(this.formSave.form.client).then(res => {
-                        if (!res.data.has) { ElMessage({ message: '"客户"不存在' }); return this.formSave.isLoading = false }
+                    request.client.has(this.formSave.form.client).then(res => {
+                        if (!res.data.has) { return this.formSave.isLoading = false }
                         if (!formData.get('file').name) { formData.set('file', this.formSave.form.file) }
                         request.orders.save(formData).then(res => {
                             this.formSave.isLoading = false

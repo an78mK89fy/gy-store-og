@@ -18,7 +18,7 @@ export const useStoreState = defineStore('state', {
                 inputErrorMessage: '大于0的整数',
             }).then(({ value }) => request.orders.state.receive({ id: scope.row.id, count: +value }).then(res => {
                 if (res.data.elMessage?.type === 'error') { return }
-                scope.row.count = value
+                scope.row.count = +value
                 if (!res.data.user) { return }
                 scope.row.id_user = res.data.user
                 if (!scope.row.todo?.length) { useStoreTodo().showCut(scope) }

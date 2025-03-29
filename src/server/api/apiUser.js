@@ -32,7 +32,7 @@ apiUser.post('/login', (req, res) => {
                         if (err) {
                             res.cookie('token', null, { maxAge: 0 })
                             res.send({
-                                elMessage: { message: `用户"${row.name}"的token无效, ` + err, type: 'error' },
+                                elMessage: { message: err, type: 'error' },
                                 route: { type: 'tokenTimeout', timeout: 1200 }
                             })
                         } else {

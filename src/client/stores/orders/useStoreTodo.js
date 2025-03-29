@@ -45,7 +45,6 @@ export const useStoreTodo = defineStore('todo', {
         edit(orders, scope) {
             this.cut.orders = orders.row
             this.progress.todo = scope.row
-            this.progress.todo.concatPaper = ''
             this.cut.id = scope.row.id
             for (let key in this.cut.form) { this.cut.form[key] = scope.row[key] }
             this.showCut(orders)

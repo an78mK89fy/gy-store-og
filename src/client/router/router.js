@@ -1,13 +1,12 @@
-import { createRouter, createWebHashHistory, createMemoryHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 import Login from '../views/Login.vue'
 import Admin from '../views/Admin.vue'
 import Main from '../views/Main.vue'
-
-import { isState } from '../utils/isState.js'
+import Id from '../views/Id.vue'
 
 const router = createRouter({
-    history: isState.local ? createWebHashHistory() : createMemoryHistory(),
+    history: createWebHashHistory(),
     routes: [
         { path: '/', component: Login },
         {
@@ -16,6 +15,7 @@ const router = createRouter({
             ]
         },
         { path: '/main', component: Main },
+        { path: '/id', component: Id },
     ]
 })
 

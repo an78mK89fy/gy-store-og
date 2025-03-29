@@ -4,6 +4,7 @@ class Orders extends (await db.constructorPromise('orders')) {
     constructor(params) {
         super(params)
         this.timeCreate = params.timeCreate || Date.now()
+        this.self = params.self ? 1 : 0
         if (typeof (params.editLine || undefined) === 'string') { this.editLine = JSON.parse(params.editLine) }
         else { this.editLine = [] }
     }

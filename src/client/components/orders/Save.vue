@@ -56,9 +56,7 @@ const rules = {
                     :debounce="0" placeholder="拼音首字母 = 搜索">
                     <template #append v-if="!form.id">
                         <el-button @click="dialogClient.show = true">
-                            <el-space>
-                                <el-icon><el-icon-user /></el-icon>添加客户
-                            </el-space>
+                            <el-space><el-icon><el-icon-user /></el-icon>添加客户</el-space>
                         </el-button>
                     </template>
                 </el-autocomplete>

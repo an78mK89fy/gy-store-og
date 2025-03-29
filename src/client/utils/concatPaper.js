@@ -1,1 +1,0 @@
-export const concatPaper = (todo) => [todo.paper, todo.grammage + 'g', todo.width, todo.length].join('*')
